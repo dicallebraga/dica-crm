@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIca | Follow-Up Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --bg2: #ffffff;
+    --bg3: #f9fafb;
+    --bg4: #eef0f3;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.13);
+    --purple: #6c3ef1;
+    --purple2: #5b2fe0;
+    --purple3: #4a22c8;
+    --purple-glow: rgba(108,62,241,0.12);
+    --purple-soft: rgba(108,62,241,0.08);
+    --text: #111827;
+    --text2: #4b5563;
+    --text3: #9ca3af;
+    --hot: #ea6a10;
+    --warm: #c49a00;
+    --cold: #2563eb;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { 
+    font-family: 'DM Sans', sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg3); }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; left:0; top:0; width:240px; height:100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100;
+    transition: transform 0.3s;
+  }
+  .logo-area {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { 
+    font-family: 'Syne', sans-serif; 
+    font-size: 22px; font-weight: 800; 
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--purple2); }
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+  .nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+  .nav-label { font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; padding: 8px 8px 4px; margin-top: 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 14px; color: var(--text2);
+    transition: all 0.15s; margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+  .nav-item:hover { background: var(--bg4); color: var(--text); }
+  .nav-item.active { background: var(--purple-soft); color: var(--purple2); border-color: rgba(108,62,241,0.2); font-weight: 500; }
+  .nav-item .icon { width: 18px; text-align: center; font-size: 16px; }
+  .nav-badge { 
+    margin-left: auto; background: var(--purple); 
+    color: #fff; font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 10px; font-family: 'Syne', sans-serif;
+  }
+  .sidebar-bottom {
+    padding: 16px; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text3);
+    background: var(--bg2);
+  }
+
+  /* MAIN */
+  .main { margin-left: 240px; min-height: 100vh; }
+  .topbar {
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 16px 28px; display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; flex: 1; }
+  .btn {
+    padding: 9px 18px; border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--purple); color: #fff; }
+  .btn-primary:hover { background: var(--purple2); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--bg4); color: var(--text); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-success { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+  .btn-danger-soft { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor:pointer; font-family:'DM Sans',sans-serif; }
+
+  .content { padding: 28px; }
+
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* DASHBOARD CARDS */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); }
+  .stat-card .s-label { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+  .stat-card .s-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 700; line-height: 1; }
+  .stat-card .s-sub { font-size: 12px; color: var(--text3); margin-top: 6px; }
+  .stat-card.purple { border-color: rgba(108,62,241,0.25); background: linear-gradient(135deg, #fff, rgba(108,62,241,0.04)); }
+  .stat-card.purple .s-value { color: var(--purple2); }
+  .stat-card.hot .s-value { color: var(--hot); }
+  .stat-card.warm .s-value { color: var(--warm); }
+  .stat-card.cold .s-value { color: var(--cold); }
+
+  /* FILTERS BAR */
+  .filters-bar {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;
+  }
+  .filter-select, .filter-input {
+    background: var(--bg2); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; padding: 8px 12px; border-radius: var(--radius-sm);
+    outline: none; cursor: pointer;
+  }
+  .filter-select:focus, .filter-input:focus { border-color: var(--purple); }
+  .filter-input { min-width: 200px; }
+  .filter-chip {
+    padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border2); background: transparent;
+    color: var(--text2); transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .filter-chip.active, .filter-chip:hover { background: var(--purple-soft); color: var(--purple2); border-color: var(--purple); }
+
+  /* LEADS TABLE */
+  .leads-table-wrap { overflow-x: auto; }
+  .leads-table { width: 100%; border-collapse: collapse; }
+  .leads-table th {
+    text-align: left; padding: 10px 14px;
+    font-size: 11px; color: var(--text3); 
+    letter-spacing: 0.8px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Syne', sans-serif; font-weight: 500;
+  }
+  .leads-table td {
+    padding: 12px 14px; font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .leads-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .lead-name { font-weight: 500; color: var(--text); }
+  .lead-phone { color: var(--text2); font-size: 12px; }
+
+  /* TEMP BADGE */
+  .temp { 
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .temp.hot { background: rgba(249,115,22,0.12); color: var(--hot); border: 1px solid rgba(249,115,22,0.2); }
+  .temp.warm { background: rgba(234,179,8,0.12); color: var(--warm); border: 1px solid rgba(234,179,8,0.2); }
+  .temp.cold { background: rgba(59,130,246,0.12); color: var(--cold); border: 1px solid rgba(59,130,246,0.2); }
+
+  /* STATUS BADGE */
+  .status-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+  }
+  .status-novo { background: rgba(108,62,241,0.15); color: var(--purple2); }
+  .status-contato { background: rgba(59,130,246,0.12); color: #60a5fa; }
+  .status-followup { background: rgba(234,179,8,0.12); color: #fbbf24; }
+  .status-negociacao { background: rgba(249,115,22,0.12); color: #fb923c; }
+  .status-visita { background: rgba(168,85,247,0.12); color: #c084fc; }
+  .status-docs { background: rgba(34,197,94,0.12); color: #4ade80; }
+  .status-fechado { background: rgba(34,197,94,0.2); color: var(--success); }
+
+  /* URGENCY */
+  .urgency-dot { 
+    width: 8px; height: 8px; border-radius: 50%; 
+    display: inline-block; margin-right: 4px; 
+  }
+  .urgency-dot.ok { background: var(--success); }
+  .urgency-dot.medium { background: var(--warm); }
+  .urgency-dot.high { background: var(--hot); animation: pulse 1.5s infinite; }
+  .urgency-dot.critical { background: var(--danger); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* KANBAN */
+  .kanban-board {
+    display: flex; gap: 14px; overflow-x: auto;
+    padding-bottom: 20px; min-height: 500px;
+  }
+  .kanban-col {
+    min-width: 220px; max-width: 220px;
+    background: var(--bg2); border-radius: var(--radius);
+    border: 1px solid var(--border); display: flex; flex-direction: column;
+  }
+  .kanban-col-header {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .kanban-col-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; }
+  .kanban-count { 
+    background: var(--bg4); color: var(--text3);
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  }
+  .kanban-cards { padding: 12px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .kanban-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .kanban-card:hover { border-color: var(--purple); transform: translateY(-1px); }
+  .kanban-card-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .kanban-card-empr { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+  .kanban-card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .days-ago { font-size: 11px; color: var(--text3); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 16px; width: 100%; max-width: 600px;
+    max-height: 90vh; overflow-y: auto;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
+  .modal-header {
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
+  .modal-close {
+    background: var(--bg4); border: none; color: var(--text2);
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-body { padding: 22px 24px; }
+  .modal-footer { 
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  .form-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .form-input, .form-select, .form-textarea {
+    background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; padding: 10px 12px; border-radius: var(--radius-sm);
+    outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--purple); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-select option { background: var(--bg2); }
+
+  /* MSG GENERATOR */
+  .msg-gen-container {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .msg-gen-form { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .msg-gen-output { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; }
+  .gen-section-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .gen-section-title .dot { width: 8px; height: 8px; background: var(--purple); border-radius: 50%; }
+
+  .tone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .tone-btn {
+    padding: 10px 8px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border2); background: transparent;
+    color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 12px;
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .tone-btn:hover { border-color: var(--purple); color: var(--purple2); background: var(--purple-soft); }
+  .tone-btn.selected { background: var(--purple-soft); border-color: var(--purple); color: var(--purple2); font-weight: 600; }
+
+  .msg-output-box {
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); padding: 16px;
+    font-size: 14px; line-height: 1.7; color: var(--text);
+    min-height: 180px; white-space: pre-wrap; flex: 1;
+    margin-bottom: 14px; position: relative;
+  }
+  .msg-output-placeholder { color: var(--text3); font-style: italic; font-size: 13px; }
+  .msg-actions { display: flex; gap: 8px; }
+
+  /* LOADING SPINNER */
+  .spinner {
+    width: 20px; height: 20px; border: 2px solid rgba(108,62,241,0.2);
+    border-top-color: var(--purple); border-radius: 50%;
+    animation: spin 0.8s linear infinite; display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-state { display: flex; align-items: center; gap: 10px; color: var(--text2); font-size: 13px; }
+
+  /* TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 12px; }
+  .timeline-item {
+    display: flex; gap: 12px;
+  }
+  .timeline-dot-wrap { display: flex; flex-direction: column; align-items: center; }
+  .timeline-dot { 
+    width: 28px; height: 28px; border-radius: 50%; 
+    background: var(--bg4); border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0;
+  }
+  .timeline-dot.purple { border-color: var(--purple); background: var(--purple-soft); }
+  .timeline-line { flex: 1; width: 1px; background: var(--border); margin: 4px 0; }
+  .timeline-content { flex: 1; padding-bottom: 8px; }
+  .timeline-time { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+  .timeline-text { font-size: 13px; color: var(--text2); }
+
+  /* LEAD DETAIL SIDE PANEL */
+  .side-panel {
+    position: fixed; right: -500px; top: 0; width: 480px; height: 100vh;
+    background: var(--bg2); border-left: 1px solid var(--border2);
+    z-index: 150; transition: right 0.3s ease;
+    overflow-y: auto;
+  }
+  .side-panel.open { right: 0; }
+  .panel-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between;
+    position: sticky; top: 0; background: var(--bg2); z-index: 5;
+  }
+  .panel-close {
+    background: var(--bg4); border: 1px solid var(--border); color: var(--text2);
+    padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer;
+    font-size: 12px; font-family: 'DM Sans', sans-serif;
+  }
+  .panel-body { padding: 20px 24px; }
+  .panel-section { margin-bottom: 24px; }
+  .panel-section-title { 
+    font-family: 'Syne', sans-serif; font-size: 12px; color: var(--text3);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info-item { }
+  .info-item .label { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+  .info-item .value { font-size: 13px; color: var(--text); }
+
+  .followup-suggestion {
+    background: rgba(108,62,241,0.08); border: 1px solid rgba(108,62,241,0.2);
+    border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px;
+  }
+  .followup-suggestion .s-title { 
+    font-size: 12px; color: var(--purple2); font-weight: 600; margin-bottom: 4px; 
+    display: flex; align-items: center; gap: 6px;
+  }
+  .followup-suggestion .s-text { font-size: 13px; color: var(--text2); }
+
+  .note-input-area {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  /* URGENCY ALERT */
+  .urgency-alert {
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--radius-sm); padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .urgency-alert .a-icon { font-size: 18px; }
+  .urgency-alert .a-text { font-size: 13px; color: #fca5a5; }
+  .urgency-alert .a-text strong { color: var(--danger); }
+
+  /* WHATSAPP BTN */
+  .wa-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #25D366; color: #fff; padding: 9px 16px;
+    border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    text-decoration: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .wa-btn:hover { background: #1aae52; transform: translateY(-1px); }
+
+  /* COPY BTN */
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg4); border: 1px solid var(--border2);
+    color: var(--text2); padding: 8px 14px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--bg3); color: var(--text); }
+  .copy-btn.copied { background: rgba(34,197,94,0.1); color: var(--success); border-color: rgba(34,197,94,0.3); }
+
+  /* TAG */
+  .tag {
+    display: inline-block; padding: 3px 9px; border-radius: 6px;
+    font-size: 11px; font-weight: 500;
+    background: var(--bg4); color: var(--text2);
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap { background: var(--bg4); border-radius: 4px; height: 6px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--purple); border-radius: 4px; transition: width 0.3s; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.25);
+    border-radius: var(--radius-sm); padding: 12px 16px; 
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    font-size: 13px; color: #fde68a;
+  }
+
+  /* EMPTY STATE */
+  .empty-state { 
+    text-align: center; padding: 60px 20px;
+    color: var(--text3);
+  }
+  .empty-state .e-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-state .e-title { font-family: 'Syne', sans-serif; font-size: 16px; color: var(--text2); margin-bottom: 6px; }
+
+  /* FOOTER */
+  footer { 
+    text-align: center; padding: 20px; 
+    color: var(--text3); font-size: 11px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px; letter-spacing: 0.5px;
+  }
+  footer span { color: var(--purple2); }
+
+  /* MOBILE TOGGLE */
+  .mobile-menu-btn {
+    display: none; background: var(--bg2); border: 1px solid var(--border2);
+    color: var(--text); padding: 8px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 18px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); padding: 12px 18px;
+    font-size: 13px; color: var(--text);
+    z-index: 999; animation: toastIn 0.2s ease;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.success { border-color: rgba(34,197,94,0.4); }
+  .toast.success::before { content: '✓'; color: var(--success); font-weight: 700; }
+  @keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .mobile-menu-btn { display: flex; align-items: center; }
+    .msg-gen-container { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .side-panel { width: 100%; }
+    #scripts-content .script-cards-grid { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 500px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .content { padding: 16px; }
+    .topbar { padding: 12px 16px; }
+  }
+
+  /* STEP INDICATOR */
+  .follow-schedule {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .follow-day {
+    padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    border: 1px solid var(--border2); color: var(--text3); background: var(--bg3);
+    font-family: 'Syne', sans-serif;
+  }
+  .follow-day.done { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: var(--success); }
+  .follow-day.next { background: var(--purple-soft); border-color: var(--purple); color: var(--purple2); }
+  .follow-day.late { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--danger); }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+
+  /* REGUA */
+  .regua-step {
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .regua-step-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; cursor: pointer;
+    background: var(--bg3); transition: background 0.12s;
+    user-select: none;
+  }
+  .regua-step-header:hover { background: var(--bg4); }
+  .regua-step.active .regua-step-header { background: var(--purple-soft); border-bottom: 1px solid rgba(108,62,241,0.15); }
+  .regua-step-badge {
+    background: var(--purple); color: #fff;
+    font-size: 10px; font-weight: 700; font-family: 'Syne', sans-serif;
+    padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+  }
+  .regua-step-badge.late { background: var(--danger); }
+  .regua-step-badge.done { background: var(--success); }
+  .regua-step-title { font-size: 13px; font-weight: 600; flex: 1; color: var(--text); }
+  .regua-step-sub { font-size: 11px; color: var(--text3); }
+  .regua-step-body { padding: 12px; background: var(--bg2); display: none; }
+  .regua-step.active .regua-step-body { display: block; }
+  .msg-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 11px 12px;
+    margin-bottom: 8px; font-size: 12px; line-height: 1.7;
+    color: var(--text2); white-space: pre-wrap; position: relative;
+  }
+  .msg-card-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--purple2);
+    font-family: 'Syne', sans-serif; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .msg-card-label.call { color: var(--success); }
+  .msg-card-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .msg-copy-mini {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    background: var(--bg4); border: 1px solid var(--border2);
+    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.12s;
+  }
+  .msg-copy-mini:hover { background: var(--purple-soft); color: var(--purple2); border-color: var(--purple); }
+  .msg-copy-mini.ok { background: rgba(34,197,94,0.1); color: var(--success); border-color: rgba(34,197,94,0.3); }
+  .regua-toggle { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  /* SCRIPTS */
+  .script-etapa-btn {
+    padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border2); background: transparent; color: var(--text2);
+    cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .script-etapa-btn:hover { border-color: var(--purple); color: var(--purple2); background: var(--purple-soft); }
+  .script-etapa-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .script-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 20px;
+  }
+  .script-card-header {
+    padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .script-tone-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    font-family: 'Syne', sans-serif; letter-spacing: 0.3px; white-space: nowrap;
+  }
+  .badge-amig { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
+  .badge-esc  { background: rgba(239,68,68,0.1); color: var(--danger);  border: 1px solid rgba(239,68,68,0.25); }
+  .script-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+  .script-card-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .script-body { padding: 18px 20px; }
+  .script-block { margin-bottom: 16px; }
+  .script-block-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 6px; font-family: 'Syne', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .script-block-label .bl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); flex-shrink: 0; }
+  .script-text {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 13px 14px;
+    font-size: 13px; line-height: 1.75; color: var(--text2);
+    white-space: pre-wrap; position: relative;
+  }
+  .script-tip {
+    background: rgba(234,179,8,0.07); border: 1px solid rgba(234,179,8,0.2);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-size: 12px; color: #92610a; line-height: 1.6;
+  }
+  .script-copy-btn {
+    font-size: 11px; padding: 5px 12px; border-radius: 6px;
+    background: var(--bg4); border: 1px solid var(--border2);
+    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.12s; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .script-copy-btn:hover { background: var(--purple-soft); color: var(--purple2); border-color: var(--purple); }
+  .script-copy-btn.ok { background: rgba(34,197,94,0.1); color: var(--success); border-color: rgba(34,197,94,0.3); }
+  .etapa-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .etapa-num {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--purple);
+    color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .etapa-title-main { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); }
+  .etapa-title-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+  select option { background: #fff; color: #111; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .pill { 
+    padding: 5px 12px; border-radius: 20px; font-size: 12px;
+    background: var(--bg4); color: var(--text2); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .pill:hover, .pill.selected { background: var(--purple-soft); color: var(--purple2); border-color: var(--purple); font-weight: 500; }
+
+  .overlay-bg { 
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+    z-index: 140; backdrop-filter: blur(2px);
+  }
+  .overlay-bg.open { display: block; }
+
+  input[type="number"] { -moz-appearance: textfield; }
+  input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .tabs { display: flex; gap: 2px; margin-bottom: 24px; background: var(--bg3); padding: 4px; border-radius: var(--radius-sm); width: fit-content; }
+  .tab-btn { 
+    padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; background: transparent; color: var(--text2);
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--bg2); color: var(--text); border: 1px solid var(--border2); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* BACKUP */
+  .btn-backup {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 10px 12px; border-radius: var(--radius-sm);
+    background: var(--purple-soft); border: 1px solid rgba(108,62,241,0.25);
+    color: var(--purple2); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; margin-bottom: 8px;
+  }
+  .btn-backup:hover { background: rgba(108,62,241,0.15); border-color: var(--purple); }
+  .btn-import {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 8px 12px; border-radius: var(--radius-sm);
+    background: transparent; border: 1px solid var(--border2);
+    color: var(--text2); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-import:hover { background: var(--bg4); color: var(--text); }
+  .backup-stat {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  .backup-stat:last-child { border-bottom: none; }
+  .backup-stat .bs-label { color: var(--text2); }
+  .backup-stat .bs-value { font-weight: 600; color: var(--text); font-family: 'Syne', sans-serif; }
+  #file-import-input { display: none; }
+  .import-drop {
+    border: 2px dashed var(--border2); border-radius: var(--radius);
+    padding: 32px 20px; text-align: center; cursor: pointer;
+    transition: all 0.2s; color: var(--text3); font-size: 13px;
+  }
+  .import-drop:hover, .import-drop.drag { border-color: var(--purple); background: var(--purple-soft); color: var(--purple2); }
+  .import-drop .drop-icon { font-size: 32px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo-area">
+    <div class="logo">DI<span>ca</span></div>
+    <div class="logo-sub">Follow-Up Inteligente</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <div class="nav-item active" onclick="showView('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showView('leads')">
+      <span class="icon">👥</span> Leads
+      <span class="nav-badge" id="leads-count-badge">0</span>
+    </div>
+    <div class="nav-item" onclick="showView('kanban')">
+      <span class="icon">🔄</span> Funil Kanban
+    </div>
+    <div class="nav-label">Ferramentas</div>
+    <div class="nav-item" onclick="showView('gerador')">
+      <span class="icon">⚡</span> Gerador IA
+    </div>
+    <div class="nav-item" onclick="showView('alertas')">
+      <span class="icon">🔔</span> Alertas
+      <span class="nav-badge" id="alert-badge" style="background:#ef4444">0</span>
+    </div>
+    <div class="nav-label">Dados</div>
+    <div class="nav-item" onclick="openBackupModal()">
+      <span class="icon">💾</span> Backup & Restore
+    </div>
+    <div class="nav-label">Vendas</div>
+    <div class="nav-item" onclick="showView('scripts')">
+      <span class="icon">🎯</span> Scripts de Vendas
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    Corretor da IA · DIca Braga
+  </div>
+</aside>
+
+<div class="overlay-bg" id="overlay-bg" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <button class="btn btn-primary btn-sm" onclick="openLeadModal()">+ Novo Lead</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="stat-grid" id="stat-grid"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+        <!-- Alertas urgentes -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+          <div class="section-title" style="margin-bottom:16px">🔥 Leads Urgentes</div>
+          <div id="urgent-list"></div>
+        </div>
+        <!-- Próximos follow-ups -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+          <div class="section-title" style="margin-bottom:16px">⏱️ Próximos Follow-ups</div>
+          <div id="upcoming-list"></div>
+        </div>
+      </div>
+
+      <!-- Funil resumo -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+        <div class="section-title" style="margin-bottom:16px">Funil de Conversão</div>
+        <div id="funnel-summary"></div>
+      </div>
+    </div>
+
+    <!-- LEADS -->
+    <div class="view" id="view-leads">
+      <div class="filters-bar">
+        <input class="filter-input" type="text" placeholder="🔍 Buscar por nome..." id="search-input" oninput="renderLeads()">
+        <select class="filter-select" id="filter-canal" onchange="renderLeads()">
+          <option value="">Todos os canais</option>
+          <option>MOBI</option><option>Notificalead</option><option>3C</option><option>Lista</option><option>PAP</option>
+        </select>
+        <select class="filter-select" id="filter-status" onchange="renderLeads()">
+          <option value="">Todos os status</option>
+          <option>Novo Lead</option><option>1º Contato</option><option>Follow-up</option>
+          <option>Negociação</option><option>Visita</option><option>Documentação</option><option>Fechamento</option>
+        </select>
+        <select class="filter-select" id="filter-temp" onchange="renderLeads()">
+          <option value="">Toda temperatura</option>
+          <option>Quente</option><option>Morno</option><option>Frio</option>
+        </select>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div class="leads-table-wrap">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>Lead</th>
+                <th>Empreendimento</th>
+                <th>Canal</th>
+                <th>Status</th>
+                <th>Temp.</th>
+                <th>Último Contato</th>
+                <th>Urgência</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody"></tbody>
+          </table>
+        </div>
+        <div id="leads-empty" class="empty-state" style="display:none">
+          <div class="e-icon">👤</div>
+          <div class="e-title">Nenhum lead encontrado</div>
+          <p>Adicione seu primeiro lead para começar</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KANBAN -->
+    <div class="view" id="view-kanban">
+      <div class="kanban-board" id="kanban-board"></div>
+    </div>
+
+    <!-- GERADOR IA -->
+    <div class="view" id="view-gerador">
+      <div class="alert-banner" style="margin-bottom:20px">
+        ⚡ <span>Preencha os dados, copie o prompt gerado e cole numa nova janela do <strong>claude.ai</strong> para receber a mensagem personalizada com IA real.</span>
+      </div>
+      <div class="msg-gen-container">
+
+        <!-- COLUNA ESQUERDA: FORMULÁRIO -->
+        <div class="msg-gen-form">
+          <div class="gen-section-title"><div class="dot"></div>Dados do Lead</div>
+
+          <div class="form-group" style="margin-bottom:14px">
+            <div class="form-label">Selecionar Lead Cadastrado</div>
+            <select class="form-select" id="gen-lead-select" onchange="onGenLeadSelect()">
+              <option value="">— Preencher manualmente —</option>
+            </select>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+            <div class="form-group">
+              <div class="form-label">Nome do Cliente *</div>
+              <input class="form-input" id="gen-nome" placeholder="Ex: João Silva" oninput="atualizarPrompt()"/>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Empreendimento</div>
+              <input class="form-input" id="gen-empr" placeholder="Ex: Grand Vivaz Penha" oninput="atualizarPrompt()"/>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+            <div class="form-group">
+              <div class="form-label">Status do Cliente</div>
+              <select class="form-select" id="gen-status" onchange="atualizarPrompt()">
+                <option>Interessado mas com dúvidas</option>
+                <option>Não responde</option>
+                <option>Sumido há dias</option>
+                <option>Em dúvida sobre o valor</option>
+                <option>Pediu para retornar</option>
+                <option>Quase fechando</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Dias sem contato</div>
+              <input class="form-input" id="gen-dias" type="number" min="0" value="0" oninput="atualizarPrompt()"/>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px">
+            <div class="form-label">Perfil do Lead</div>
+            <div class="pill-row">
+              <div class="pill selected" id="pill-moradia" onclick="selectPill('perfil','moradia')">🏠 Moradia</div>
+              <div class="pill" id="pill-investidor" onclick="selectPill('perfil','investidor')">💰 Investidor</div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px">
+            <div class="form-label">Contexto da última conversa <span style="color:var(--danger)">*</span></div>
+            <textarea class="form-textarea" id="gen-contexto" style="min-height:110px" placeholder="Descreva com detalhes: o que foi dito, qual objeção levantou, o que demonstrou interesse, o que travou a decisão, se tem FGTS, renda, prazo para decidir..." oninput="atualizarPrompt()"></textarea>
+            <div id="ctx-chars" style="font-size:11px;color:var(--text3);text-align:right;margin-top:3px">0 caracteres</div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:6px">
+            <div class="form-label">Tom da Mensagem</div>
+            <div class="tone-grid">
+              <button class="tone-btn selected" data-tone="urgente" onclick="selectTone(this)">⏰ Urgente</button>
+              <button class="tone-btn" data-tone="amigavel" onclick="selectTone(this)">😊 Amigável</button>
+              <button class="tone-btn" data-tone="escassez" onclick="selectTone(this)">🔥 Escassez</button>
+              <button class="tone-btn" data-tone="reversa" onclick="selectTone(this)">🎯 Psic. Reversa</button>
+              <button class="tone-btn" data-tone="agressivo" onclick="selectTone(this)">💣 Agressivo</button>
+              <button class="tone-btn" data-tone="reativacao" onclick="selectTone(this)">🔄 Reativação</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUNA DIREITA: PROMPT GERADO -->
+        <div class="msg-gen-output">
+          <div class="gen-section-title"><div class="dot"></div>Prompt Pronto para o Claude</div>
+
+          <div id="prompt-output-box" style="
+            background:var(--bg3);
+            border:1px solid var(--border2);
+            border-radius:var(--radius-sm);
+            padding:14px;
+            font-size:12px;
+            line-height:1.8;
+            color:var(--text);
+            font-family:monospace;
+            white-space:pre-wrap;
+            min-height:280px;
+            flex:1;
+            margin-bottom:14px;
+            overflow-y:auto;
+            max-height:400px;
+          "><span style="color:var(--text3);font-style:italic;font-family:'DM Sans',sans-serif;font-size:13px">Preencha o nome do cliente e o contexto da conversa para gerar o prompt...</span></div>
+
+          <div style="display:flex;gap:8px;margin-bottom:16px" id="prompt-actions">
+            <button class="copy-btn" id="copy-prompt-btn" onclick="copiarPrompt()">📋 Copiar Prompt</button>
+            <a class="wa-btn" href="https://claude.ai" target="_blank" style="font-size:12px;padding:8px 14px;background:var(--purple);text-decoration:none">🤖 Abrir Claude.ai</a>
+          </div>
+
+          <hr class="divider">
+
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-family:'Syne',sans-serif;letter-spacing:0.5px;text-transform:uppercase">Como usar</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.7;background:var(--purple-soft);border:1px solid rgba(108,62,241,0.15);border-radius:var(--radius-sm);padding:12px">
+            1. Preencha os dados e o contexto da conversa<br>
+            2. Clique em <strong>Copiar Prompt</strong><br>
+            3. Abra o <strong>claude.ai</strong> numa nova aba<br>
+            4. Cole o prompt e envie — a mensagem será gerada com base no contexto real do lead
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="view" id="view-alertas">
+      <div id="alertas-content"></div>
+    </div>
+
+    <!-- SCRIPTS DE VENDAS -->
+    <div class="view" id="view-scripts">
+      <div style="margin-bottom:24px">
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;background:var(--purple-soft);border:1px solid rgba(108,62,241,0.15);border-radius:var(--radius-sm);padding:14px 16px">
+          🎯 Scripts de alta performance para cada etapa da jornada de vendas Vivaz. Duas variações por etapa: <strong>Amigável & Envolvente</strong> e <strong>Escassez & Psicologia Reversa</strong>. Copie e adapte com o nome do cliente.
+        </div>
+      </div>
+
+      <!-- NAV ETAPAS -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px" id="scripts-nav"></div>
+
+      <!-- CONTEÚDO -->
+      <div id="scripts-content"></div>
+    </div>
+
+  </div>
+
+  <footer>Desenvolvido por <span>DIca Braga</span> · IA Integrada · Vivaz by Cyrela</footer>
+</div>
+
+<!-- MODAL NOVO/EDITAR LEAD -->
+<div class="modal-overlay" id="lead-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Novo Lead</div>
+      <button class="modal-close" onclick="closeModal('lead-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nome Completo *</label>
+          <input class="form-input" id="f-nome" placeholder="João da Silva">
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp *</label>
+          <input class="form-input" id="f-phone" placeholder="(11) 99999-9999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Canal de Origem</label>
+          <select class="form-select" id="f-canal">
+            <option>MOBI</option><option>Notificalead</option><option>3C</option><option>Lista</option><option>PAP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empreendimento</label>
+          <input class="form-input" id="f-empr" placeholder="Grand Vivaz Penha">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Perfil</label>
+          <select class="form-select" id="f-perfil">
+            <option>Moradia</option><option>Investidor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Temperatura</label>
+          <select class="form-select" id="f-temp">
+            <option>Morno</option><option>Quente</option><option>Frio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status no Funil</label>
+          <select class="form-select" id="f-status">
+            <option>Novo Lead</option><option>1º Contato</option><option>Follow-up</option>
+            <option>Negociação</option><option>Visita</option><option>Documentação</option><option>Fechamento</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">FGTS</label>
+          <select class="form-select" id="f-fgts">
+            <option>Não sabe</option><option>Sim</option><option>Não</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Renda Aproximada (R$)</label>
+          <input class="form-input" id="f-renda" placeholder="Opcional">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Observações iniciais</label>
+          <textarea class="form-textarea" id="f-obs" placeholder="Informações relevantes sobre o lead..."></textarea>
+        </div>
+
+        <!-- CONFIGURAÇÃO DE FOLLOW-UP -->
+        <div class="form-group full" style="margin-top:4px">
+          <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px">
+            <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+              ⚙️ Configuração de Follow-Up
+            </div>
+
+            <!-- Toggle sem follow-up -->
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);transition:all 0.15s" id="fu-pausar-wrap">
+              <div style="position:relative;width:36px;height:20px;flex-shrink:0">
+                <input type="checkbox" id="f-pausar-fu" style="opacity:0;width:0;height:0;position:absolute" onchange="toggleFuConfig()">
+                <div id="fu-toggle-track" style="position:absolute;inset:0;border-radius:10px;background:var(--bg4);border:1px solid var(--border2);transition:all 0.2s"></div>
+                <div id="fu-toggle-thumb" style="position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;border:1px solid var(--border2);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.15)"></div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Pausar follow-up automático</div>
+                <div style="font-size:11px;color:var(--text3)">Lead não aparecerá nos alertas enquanto pausado</div>
+              </div>
+            </label>
+
+            <!-- Período customizado -->
+            <div id="fu-custom-wrap">
+              <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500">Régua personalizada (dias)</div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="fu-regua-grid">
+                <div>
+                  <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:4px">1º FU</div>
+                  <input class="form-input" id="f-fu1" type="number" min="1" value="1" style="text-align:center;padding:7px 4px">
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:4px">2º FU</div>
+                  <input class="form-input" id="f-fu2" type="number" min="1" value="3" style="text-align:center;padding:7px 4px">
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:4px">3º FU</div>
+                  <input class="form-input" id="f-fu3" type="number" min="1" value="7" style="text-align:center;padding:7px 4px">
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:4px">4º FU</div>
+                  <input class="form-input" id="f-fu4" type="number" min="1" value="15" style="text-align:center;padding:7px 4px">
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:4px">5º FU</div>
+                  <input class="form-input" id="f-fu5" type="number" min="1" value="30" style="text-align:center;padding:7px 4px">
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-top:6px">Padrão: 1 · 3 · 7 · 15 · 30 dias. Altere conforme necessidade.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('lead-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarLead()">Salvar Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIDE PANEL DETALHE DO LEAD -->
+<div class="side-panel" id="lead-panel">
+  <div class="panel-header">
+    <div>
+      <div id="panel-nome" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:4px"></div>
+      <div id="panel-sub" style="font-size:13px;color:var(--text2)"></div>
+    </div>
+    <button class="panel-close" onclick="closePanel()">✕ Fechar</button>
+  </div>
+  <div class="panel-body">
+    <div id="panel-urgency-alert"></div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Informações</div>
+      <div class="info-grid" id="panel-info"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Atualizar Status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="form-select" id="panel-status-select" style="flex:1"></select>
+        <select class="form-select" id="panel-temp-select">
+          <option>Quente</option><option>Morno</option><option>Frio</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="atualizarStatusLead()">✓</button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Agenda de Follow-Up</div>
+      <div id="panel-followup"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Configuração de Follow-Up</div>
+      <div id="panel-fu-config"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Régua de Mensagens</div>
+      <div id="panel-regua"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Sugestão do Assistente</div>
+      <div id="panel-suggestion"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Ações Rápidas</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a id="panel-wa-btn" class="wa-btn" href="#" target="_blank">📱 WhatsApp</a>
+        <button class="btn btn-ghost btn-sm" onclick="irParaGerador()">⚡ Gerar Mensagem</button>
+        <button class="btn btn-ghost btn-sm" onclick="registrarContato()">✏️ Registrar Contato</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="panel-section">
+      <div class="panel-section-title">Adicionar Nota</div>
+      <div class="note-input-area">
+        <textarea class="form-textarea" id="panel-nota" placeholder="Resultado da ligação, observação importante..."></textarea>
+        <button class="btn btn-primary btn-sm" onclick="adicionarNota()" style="align-self:flex-end">Salvar Nota</button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Histórico</div>
+      <div class="timeline" id="panel-timeline"></div>
+    </div>
+
+    <hr class="divider">
+    <button class="btn-danger-soft" onclick="excluirLead()">🗑 Excluir lead</button>
+  </div>
+</div>
+<div class="overlay-bg" id="panel-overlay" onclick="closePanel()"></div>
+
+<!-- BACKUP MODAL -->
+<div class="modal-overlay" id="backup-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">💾 Backup & Restore</div>
+      <button class="modal-close" onclick="closeModal('backup-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Stats -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px">
+        <div style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:'Syne',sans-serif">Dados Salvos Atualmente</div>
+        <div class="backup-stat"><span class="bs-label">Total de leads</span><span class="bs-value" id="bk-total">0</span></div>
+        <div class="backup-stat"><span class="bs-label">Último backup</span><span class="bs-value" id="bk-last">—</span></div>
+        <div class="backup-stat"><span class="bs-label">Tamanho dos dados</span><span class="bs-value" id="bk-size">—</span></div>
+      </div>
+
+      <!-- Export -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;font-family:'Syne',sans-serif">📤 Exportar Backup</div>
+        <button class="btn-backup" onclick="exportarBackup()">
+          <span style="font-size:16px">💾</span> Baixar backup (.json)
+        </button>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Salva todos os leads, histórico e notas em um arquivo JSON seguro.</div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+
+      <!-- Import -->
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;font-family:'Syne',sans-serif">📥 Restaurar Backup</div>
+        <div class="import-drop" id="import-drop" onclick="document.getElementById('file-import-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event)">
+          <div class="drop-icon">📂</div>
+          <div>Clique ou arraste o arquivo de backup</div>
+          <div style="font-size:11px;margin-top:4px;opacity:0.7">Apenas arquivos .json gerados por este sistema</div>
+        </div>
+        <input type="file" id="file-import-input" accept=".json" onchange="importarBackup(this)">
+        <div style="font-size:11px;color:var(--danger);margin-top:8px">⚠️ A restauração substituirá todos os dados atuais.</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('backup-modal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  DATA LAYER
+// ============================================================
+let leads = JSON.parse(localStorage.getItem('dc_leads') || '[]');
+let currentLeadId = null;
+let selectedTone = 'urgente';
+let selectedPerfil = 'moradia';
+let editingLeadId = null;
+
+const FUNNEL_STAGES = ['Novo Lead','1º Contato','Follow-up','Negociação','Visita','Documentação','Fechamento'];
+
+function saveleads() { localStorage.setItem('dc_leads', JSON.stringify(leads)); }
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+
+function daysAgo(dateStr) {
+  if (!dateStr) return 999;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  return Math.floor(diff / 86400000);
+}
+
+function urgencyLevel(d) {
+  if (d <= 1) return { level: 'ok', label: 'Hoje', cls: 'ok' };
+  if (d <= 3) return { level: 'medium', label: `${d}d`, cls: 'medium' };
+  if (d <= 7) return { level: 'high', label: `${d}d`, cls: 'high' };
+  return { level: 'critical', label: `${d}d ⚠️`, cls: 'critical' };
+}
+
+// seed sample data if empty
+function seedIfEmpty() {
+  if (leads.length > 0) return;
+  const now = new Date();
+  const ago = (d) => new Date(now - d*86400000).toISOString();
+  leads = [
+    { id: genId(), nome: 'Carlos Mendonça', phone: '11987654321', canal: 'MOBI', empr: 'Grand Vivaz Penha', perfil: 'Moradia', temp: 'Quente', status: 'Follow-up', fgts: 'Sim', renda: '3500', obs: 'Muito interessado, aguarda documentação', lastContact: ago(5), history: [{date: ago(5), text: 'Ligação realizada, gostou do empreendimento'},{date: ago(8), text: 'Primeiro contato via WhatsApp'}], notes: [] },
+    { id: genId(), nome: 'Fernanda Lima', phone: '11912345678', canal: 'Notificalead', empr: 'Grand Vivaz Lapa', perfil: 'Investidor', temp: 'Morno', status: '1º Contato', fgts: 'Não sabe', renda: '5000', obs: '', lastContact: ago(12), history: [{date: ago(12), text: 'Captado via Notificalead, respondeu mensagem inicial'}], notes: [] },
+    { id: genId(), nome: 'Rafael Santos', phone: '11956789012', canal: '3C', empr: 'Grand Vivaz Penha', perfil: 'Moradia', temp: 'Frio', status: 'Novo Lead', fgts: 'Não', renda: '', obs: 'Deu o número mas não respondeu mais', lastContact: ago(20), history: [{date: ago(20), text: 'Lead captado via 3C'}], notes: [] },
+    { id: genId(), nome: 'Juliana Ferreira', phone: '11934567890', canal: 'Lista', empr: 'Grand Vivaz Lapa', perfil: 'Moradia', temp: 'Quente', status: 'Negociação', fgts: 'Sim', renda: '4200', obs: 'Aguardando aprovação de crédito', lastContact: ago(2), history: [{date: ago(2), text: 'Análise de crédito iniciada'},{date: ago(6), text: 'Visita realizada, adorou'},{date: ago(10), text: 'Apresentação do empreendimento'}], notes: [] },
+    { id: genId(), nome: 'Diego Oliveira', phone: '11978901234', canal: 'PAP', empr: 'Grand Vivaz Penha', perfil: 'Investidor', temp: 'Morno', status: 'Follow-up', fgts: 'Sim', renda: '6000', obs: 'Quer investir mas está pesquisando', lastContact: ago(8), history: [{date: ago(8), text: 'Enviou proposta de investimento'},{date: ago(15), text: 'Apresentação do retorno sobre investimento'}], notes: [] },
+  ];
+  saveleads();
+}
+seedIfEmpty();
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  const map = { dashboard: 0, leads: 1, kanban: 2, gerador: 3, alertas: 4, scripts: 6 };
+  document.querySelectorAll('.nav-item')[map[v]]?.classList.add('active');
+  const titles = { dashboard: 'Dashboard', leads: 'Leads', kanban: 'Funil Kanban', gerador: 'Gerador IA de Mensagens', alertas: 'Alertas de Follow-Up', scripts: 'Scripts de Vendas' };
+  document.getElementById('topbar-title').textContent = titles[v];
+  closeSidebar();
+  if (v === 'dashboard') renderDashboard();
+  if (v === 'leads') renderLeads();
+  if (v === 'kanban') renderKanban();
+  if (v === 'gerador') populateGenSelect();
+  if (v === 'alertas') renderAlertas();
+  if (v === 'scripts') renderScripts();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay-bg').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay-bg').classList.remove('open');
+}
+
+// ============================================================
+//  DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const total = leads.length;
+  const hot = leads.filter(l => l.temp === 'Quente').length;
+  const warn = leads.filter(l => l.temp === 'Morno').length;
+  const cold = leads.filter(l => l.temp === 'Frio').length;
+  const fechados = leads.filter(l => l.status === 'Fechamento').length;
+  const parados = leads.filter(l => daysAgo(l.lastContact) >= 1 && l.status !== 'Fechamento').length;
+  const taxa = total > 0 ? ((fechados / total) * 100).toFixed(1) : 0;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card purple"><div class="s-label">Total de Leads</div><div class="s-value">${total}</div><div class="s-sub">no funil</div></div>
+    <div class="stat-card hot"><div class="s-label">🔥 Quentes</div><div class="s-value">${hot}</div><div class="s-sub">alta prioridade</div></div>
+    <div class="stat-card warm"><div class="s-label">🌡 Mornos</div><div class="s-value">${warn}</div><div class="s-sub">nutrir agora</div></div>
+    <div class="stat-card cold"><div class="s-label">❄️ Frios</div><div class="s-value">${cold}</div><div class="s-sub">reativar</div></div>
+    <div class="stat-card"><div class="s-label">✅ Fechados</div><div class="s-value" style="color:var(--success)">${fechados}</div><div class="s-sub">conversões</div></div>
+    <div class="stat-card"><div class="s-label">⏰ Aguardando FU</div><div class="s-value" style="color:var(--danger)">${parados}</div><div class="s-sub">≥ 1 dia sem contato</div></div>
+    <div class="stat-card"><div class="s-label">📈 Taxa Conv.</div><div class="s-value" style="color:var(--purple2)">${taxa}%</div><div class="s-sub">fechados/total</div></div>
+  `;
+  document.getElementById('leads-count-badge').textContent = total;
+
+  // Urgentes — alinha com a régua: D+7 já é urgente, D+15 é crítico
+  const urgentes = leads.filter(l => daysAgo(l.lastContact) >= 7 && l.status !== 'Fechamento')
+    .sort((a,b) => daysAgo(b.lastContact) - daysAgo(a.lastContact)).slice(0,5);
+  const urgList = document.getElementById('urgent-list');
+  if (urgentes.length === 0) { urgList.innerHTML = '<div style="color:var(--text3);font-size:13px">Nenhum lead urgente. ✨</div>'; }
+  else urgList.innerHTML = urgentes.map(l => {
+    const d = daysAgo(l.lastContact);
+    const etapa = d >= 30 ? 'D+30 · Reativação fria' : d >= 15 ? 'D+15 · Psic. reversa' : 'D+7 · Urgência';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span class="urgency-dot ${urgencyLevel(d).cls}"></span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${l.nome}</div>
+        <div style="font-size:11px;color:var(--text3)">${l.empr || '—'} · <span style="color:var(--purple2)">${etapa}</span></div>
+      </div>
+      <span style="font-size:11px;color:var(--danger);font-weight:600">${d}d</span>
+      <button class="btn btn-ghost btn-sm" onclick="openPanel('${l.id}')">Ver</button>
+    </div>`;
+  }).join('');
+
+  // Próximos follow-ups — respeita régua: D+1, D+3, D+7, D+15, D+30
+  const REGUA = [1, 3, 7, 15, 30];
+  const proximosFollowup = leads
+    .filter(l => l.status !== 'Fechamento')
+    .map(l => {
+      const d = daysAgo(l.lastContact);
+      const proxEtapa = REGUA.find(r => d < r);
+      if (!proxEtapa) return null;
+      const faltam = proxEtapa - d;
+      return { l, d, proxEtapa, faltam };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.faltam - b.faltam)
+    .slice(0, 6);
+
+  const upList = document.getElementById('upcoming-list');
+  if (proximosFollowup.length === 0) {
+    upList.innerHTML = '<div style="color:var(--text3);font-size:13px">Nenhum follow-up próximo.</div>';
+  } else {
+    upList.innerHTML = proximosFollowup.map(({ l, d, proxEtapa, faltam }) => {
+      const label = faltam === 0 ? '<span style="color:var(--danger);font-weight:700">Enviar hoje!</span>'
+        : faltam === 1 ? '<span style="color:var(--hot);font-weight:600">Amanhã</span>'
+        : `<span style="color:var(--warm);font-weight:600">Em ${faltam}d</span>`;
+      const etapaLabel = `D+${proxEtapa}`;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--purple-soft);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--purple2);font-family:'Syne',sans-serif;flex-shrink:0">${l.nome[0]}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${l.nome}</div>
+          <div style="font-size:11px;color:var(--text3)">${l.status} · <span style="color:var(--purple2)">${etapaLabel}</span></div>
+        </div>
+        ${label}
+      </div>`;
+    }).join('');
+  }
+
+  // Funil
+  const funnelHtml = FUNNEL_STAGES.map(s => {
+    const count = leads.filter(l => l.status === s).length;
+    const pct = total > 0 ? (count / total * 100) : 0;
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="min-width:110px;font-size:12px;color:var(--text2)">${s}</div>
+      <div class="progress-bar-wrap" style="flex:1"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div style="min-width:28px;text-align:right;font-size:13px;font-weight:600;font-family:'Syne',sans-serif">${count}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('funnel-summary').innerHTML = funnelHtml;
+
+  // Update alert badge — exclui leads com fu pausado
+  const alertCount = leads.filter(l => !l.fuPausado && daysAgo(l.lastContact) >= 1 && l.status !== 'Fechamento').length;
+  document.getElementById('alert-badge').textContent = alertCount;
+}
+
+// ============================================================
+//  LEADS TABLE
+// ============================================================
+function renderLeads() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const canal = document.getElementById('filter-canal').value;
+  const status = document.getElementById('filter-status').value;
+  const temp = document.getElementById('filter-temp').value;
+
+  let filtered = leads.filter(l => {
+    if (search && !l.nome.toLowerCase().includes(search)) return false;
+    if (canal && l.canal !== canal) return false;
+    if (status && l.status !== status) return false;
+    if (temp && l.temp !== temp) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('leads-tbody');
+  const empty = document.getElementById('leads-empty');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(l => {
+    const d = daysAgo(l.lastContact);
+    const urg = urgencyLevel(d);
+    const tempClass = {Quente:'hot',Morno:'warm',Frio:'cold'}[l.temp] || 'warm';
+    const statusClass = { 'Novo Lead':'novo','1º Contato':'contato','Follow-up':'followup','Negociação':'negociacao','Visita':'visita','Documentação':'docs','Fechamento':'fechado' }[l.status] || 'novo';
+    return `<tr>
+      <td>
+        <div class="lead-name">${l.nome}</div>
+        <div class="lead-phone">${formatPhone(l.phone)}</div>
+        ${l.fuPausado ? '<div style="font-size:10px;color:var(--text3);margin-top:2px">⏸ FU pausado</div>' : l.fuRegua && l.fuRegua.join(',') !== '1,3,7,15,30' ? '<div style="font-size:10px;color:var(--purple2);margin-top:2px">⚙️ Régua custom</div>' : ''}
+      </td>
+      <td style="font-size:13px;color:var(--text2)">${l.empr || '—'}</td>
+      <td><span class="tag">${l.canal}</span></td>
+      <td><span class="status-badge status-${statusClass}">${l.status}</span></td>
+      <td><span class="temp ${tempClass}">● ${l.temp}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${d === 0 ? 'Hoje' : d + 'd atrás'}</td>
+      <td><span class="urgency-dot ${urg.cls}"></span><span style="font-size:12px;color:var(--text2)">${urg.label}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="openPanel('${l.id}')">Ver</button>
+          <a class="btn btn-success btn-sm" href="https://wa.me/55${l.phone.replace(/\D/g,'')}" target="_blank">WA</a>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function formatPhone(p) {
+  const n = p.replace(/\D/g, '');
+  if (n.length === 11) return `(${n.slice(0,2)}) ${n.slice(2,7)}-${n.slice(7)}`;
+  return p;
+}
+
+// ============================================================
+//  KANBAN
+// ============================================================
+function renderKanban() {
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = FUNNEL_STAGES.map(stage => {
+    const cards = leads.filter(l => l.status === stage);
+    const cardsHtml = cards.length === 0 
+      ? '<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px 0">Nenhum lead</div>'
+      : cards.map(l => {
+          const d = daysAgo(l.lastContact);
+          const urg = urgencyLevel(d);
+          const tempClass = {Quente:'hot',Morno:'warm',Frio:'cold'}[l.temp] || 'warm';
+          return `<div class="kanban-card" onclick="openPanel('${l.id}')">
+            <div class="kanban-card-name">${l.nome}</div>
+            <div class="kanban-card-empr">${l.empr || 'Sem empreendimento'}</div>
+            <div class="kanban-card-footer">
+              <span class="temp ${tempClass}" style="font-size:10px;padding:2px 8px">● ${l.temp}</span>
+              <span class="days-ago"><span class="urgency-dot ${urg.cls}"></span>${d === 0 ? 'hoje' : d+'d'}</span>
+            </div>
+          </div>`;
+        }).join('');
+    return `<div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title">${stage}</span>
+        <span class="kanban-count">${cards.length}</span>
+      </div>
+      <div class="kanban-cards">${cardsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+//  LEAD DETAIL PANEL
+// ============================================================
+function openPanel(id) {
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+  currentLeadId = id;
+
+  document.getElementById('panel-nome').textContent = lead.nome;
+  document.getElementById('panel-sub').textContent = `${lead.empr || 'Sem empreendimento'} · ${lead.canal}`;
+
+  const d = daysAgo(lead.lastContact);
+  const alertHtml = d > 7 
+    ? `<div class="urgency-alert"><span class="a-icon">⚠️</span><div class="a-text"><strong>${d} dias sem contato!</strong> Hora de reativar este lead com urgência.</div></div>`
+    : '';
+  document.getElementById('panel-urgency-alert').innerHTML = alertHtml;
+
+  document.getElementById('panel-info').innerHTML = `
+    <div class="info-item"><div class="label">WhatsApp</div><div class="value">${formatPhone(lead.phone)}</div></div>
+    <div class="info-item"><div class="label">Canal</div><div class="value">${lead.canal}</div></div>
+    <div class="info-item"><div class="label">Perfil</div><div class="value">${lead.perfil}</div></div>
+    <div class="info-item"><div class="label">FGTS</div><div class="value">${lead.fgts}</div></div>
+    ${lead.renda ? `<div class="info-item"><div class="label">Renda</div><div class="value">R$ ${Number(lead.renda).toLocaleString('pt-BR')}</div></div>` : ''}
+    <div class="info-item"><div class="label">Temperatura</div><div class="value"><span class="temp ${({Quente:'hot',Morno:'warm',Frio:'cold'}[lead.temp]||'warm')}">● ${lead.temp}</span></div></div>
+    ${lead.obs ? `<div class="info-item" style="grid-column:1/-1"><div class="label">Obs.</div><div class="value">${lead.obs}</div></div>` : ''}
+  `;
+
+  const statusSel = document.getElementById('panel-status-select');
+  statusSel.innerHTML = FUNNEL_STAGES.map(s => `<option ${s===lead.status?'selected':''}>${s}</option>`).join('');
+  document.getElementById('panel-temp-select').value = lead.temp;
+
+  // Follow-up schedule
+  const days = [1,3,7,15,30];
+  const daysSince = d;
+  const scheduleHtml = days.map(day => {
+    let cls = '';
+    if (daysSince > day + 2) cls = 'done';
+    else if (daysSince >= day - 1 && daysSince <= day + 2) cls = 'next';
+    else if (daysSince > day + 2) cls = 'late';
+    return `<div class="follow-day ${cls}">D+${day}</div>`;
+  }).join('');
+  document.getElementById('panel-followup').innerHTML = `
+    <div class="follow-schedule">${scheduleHtml}</div>
+    <div style="font-size:12px;color:var(--text3);margin-top:8px">${d === 0 ? 'Contato hoje' : `Último contato há ${d} dias`}</div>
+  `;
+
+  // Sugestão
+  const suggestion = getSuggestion(lead, d);
+  document.getElementById('panel-suggestion').innerHTML = `
+    <div class="followup-suggestion">
+      <div class="s-title">🤖 ${suggestion.title}</div>
+      <div class="s-text">${suggestion.text}</div>
+    </div>
+  `;
+
+  // Régua de mensagens
+  renderRegua(lead, d);
+
+  // Config de follow-up inline
+  renderPanelFuConfig(lead);
+
+  document.getElementById('panel-wa-btn').href = `https://wa.me/55${lead.phone.replace(/\D/g,'')}`;
+
+  // Timeline
+  const allHistory = [...(lead.history || []), ...(lead.notes || [])].sort((a,b) => new Date(b.date) - new Date(a.date));
+  document.getElementById('panel-timeline').innerHTML = allHistory.length === 0 
+    ? '<div style="color:var(--text3);font-size:13px">Sem histórico ainda.</div>'
+    : allHistory.map((h, i) => `
+      <div class="timeline-item">
+        <div class="timeline-dot-wrap">
+          <div class="timeline-dot ${i===0?'purple':''}">📝</div>
+          ${i < allHistory.length-1 ? '<div class="timeline-line"></div>' : ''}
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-time">${new Date(h.date).toLocaleDateString('pt-BR')} às ${new Date(h.date).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+          <div class="timeline-text">${h.text}</div>
+        </div>
+      </div>`).join('');
+
+  document.getElementById('lead-panel').classList.add('open');
+  document.getElementById('panel-overlay').classList.add('open');
+}
+
+function getSuggestion(lead, daysSince) {
+  if (daysSince > 15) return { title: 'Reativar com urgência', text: `${lead.nome} está ${daysSince} dias sem resposta. Use a psicologia reversa: "Entendo que talvez não seja o momento certo, fica sem compromisso."` };
+  if (daysSince > 7) return { title: 'Mensagem de escassez', text: `Mencione que as unidades do ${lead.empr || 'empreendimento'} estão acabando. Crie urgência real.` };
+  if (lead.temp === 'Frio') return { title: 'Reaquecimento', text: `Envie um conteúdo de valor: "Separei uma simulação personalizada para você". Gere curiosidade.` };
+  if (lead.status === 'Follow-up') return { title: 'Fechar compromisso', text: `Proponha uma visita ou ligação com data e hora específicas. Não deixe em aberto.` };
+  if (lead.perfil === 'Investidor') return { title: 'Abordar ROI', text: `Mostre que o imóvel se paga com aluguel. Foco em patrimônio que se paga sozinho.` };
+  return { title: 'Manter calor', text: `Lead em bom momento. Faça contato para manter engajamento. Pergunte sobre dúvidas.` };
+}
+
+// ============================================================
+//  RÉGUA DE FOLLOW-UP
+// ============================================================
+function renderRegua(lead, diasSemContato) {
+  const nome = lead.nome.split(' ')[0];
+  const empr = lead.empr || 'nosso empreendimento';
+  const isInv = lead.perfil === 'Investidor';
+
+  const etapas = [
+    {
+      dia: 1,
+      titulo: 'D+1 — Primeiro retorno',
+      sub: 'No dia seguinte ao primeiro contato, se não respondeu',
+      msgs: [
+        { label: 'WA · Leve', texto: `${nome}, oi! 👋 Só passando pra saber se você recebeu as informações que te mandei sobre o ${empr}. Ficou alguma dúvida? Estou aqui!` },
+        { label: 'WA · Direto', texto: `${nome}, tudo bem? Não vi seu retorno — queria só confirmar se você teve chance de ver o que eu enviei sobre o ${empr}. Me fala!` },
+      ],
+      ligacao: `Olá, ${nome}? Aqui é o André da DIca, tudo bem? Estava passando pra saber se você recebeu as informações que mandei sobre o ${empr} e se ficou alguma dúvida. Tem 2 minutinhos?`
+    },
+    {
+      dia: 3,
+      titulo: 'D+3 — Aquecimento com valor',
+      sub: '3 dias sem resposta — reforçar valor e gerar curiosidade',
+      msgs: [
+        { label: 'WA · Simulação', texto: `${nome}, separei uma simulação personalizada para o seu perfil no ${empr}. A parcela ficou bem abaixo do que você paga de aluguel hoje. Posso te enviar agora?` },
+        { label: isInv ? 'WA · Investidor' : 'WA · Moradia', texto: isInv
+            ? `${nome}, fiz os cálculos aqui: o ${empr} se paga com o próprio aluguel em menos de 10 anos. Quer ver os números?`
+            : `${nome}, você sabia que no ${empr} a parcela do financiamento pode sair menor que o aluguel que você paga hoje? Te mando a simulação agora?` },
+      ],
+      ligacao: `${nome}, oi! André da DIca. Preparei uma simulação personalizada para você do ${empr} — ficou bem interessante. Você consegue dar uma olhadinha agora ou prefere que eu mande por mensagem?`
+    },
+    {
+      dia: 7,
+      titulo: 'D+7 — Urgência e escassez',
+      sub: '7 dias sem resposta — criar senso de perda e prazo real',
+      msgs: [
+        { label: 'WA · Escassez', texto: `${nome}, precisava te avisar: as unidades que separamos no ${empr} estão acabando. Essa semana já fechamos 3. Ainda consigo te reservar uma antes de liberar para outros clientes?` },
+        { label: 'WA · Feirão', texto: `${nome}! Temos condição especial de feirão no ${empr} válida só até essa semana — entrada facilitada e parcelas que não vão se repetir. Vale a pena a gente conversar hoje ainda?` },
+      ],
+      ligacao: `${nome}, André da DIca aqui. Preciso te dar um aviso importante sobre o ${empr}: as unidades estão quase todas comprometidas e a condição especial encerra essa semana. Você ainda tem interesse? Quero garantir a sua antes de liberar.`
+    },
+    {
+      dia: 15,
+      titulo: 'D+15 — Psicologia reversa',
+      sub: '15 dias sem resposta — desapego total para reativar',
+      msgs: [
+        { label: 'WA · Reversa', texto: `${nome}, tudo bem? Vou ser honesto — percebi que talvez o momento não seja esse pra você, e tudo bem. Cada um tem o seu tempo. Se um dia quiser retomar a conversa sobre o ${empr}, estarei aqui. Abraços! 🤝` },
+        { label: 'WA · Última chance', texto: `${nome}, última mensagem, prometo! Uma coisa mudou no ${empr} essa semana que pode mudar sua decisão. Se quiser saber, é só responder. Se não, fica sem compromisso. 👋` },
+      ],
+      ligacao: `${nome}, oi! André aqui, última tentativa de contato. Queria só entender se houve algum problema da minha parte ou se realmente não é o momento para o ${empr}. Me fala sem problema nenhum — só quero entender para melhorar.`
+    },
+    {
+      dia: 30,
+      titulo: 'D+30 — Reativação fria',
+      sub: '30 dias sem resposta — nova abordagem, novo ângulo',
+      msgs: [
+        { label: 'WA · Nova abordagem', texto: `${nome}, faz um tempão que não conversamos! Surgiu uma novidade no ${empr} que me fez pensar em você. Posso te contar em 1 minuto?` },
+        { label: 'WA · Gancho', texto: `${nome}! Sei que faz tempo, mas recebi uma informação sobre o ${empr} que pode mudar completamente sua análise. Você ainda tem interesse no assunto?` },
+      ],
+      ligacao: `${nome}, oi! André da DIca, faz tempo! Lembro que a gente conversou sobre o ${empr} e queria te dar uma atualização importante — as condições mudaram bastante. Vale 2 minutinhos do seu tempo?`
+    },
+  ];
+
+  // Determina etapa ativa com base nos dias sem contato
+  let etapaAtiva = 0;
+  if (diasSemContato < 1)       etapaAtiva = 0;
+  else if (diasSemContato < 3)  etapaAtiva = 0;
+  else if (diasSemContato < 7)  etapaAtiva = 1;
+  else if (diasSemContato < 15) etapaAtiva = 2;
+  else if (diasSemContato < 30) etapaAtiva = 3;
+  else                          etapaAtiva = 4;
+
+  const limites = [1, 3, 7, 15, 30];
+  const html = etapas.map((e, i) => {
+    const jaPassou = diasSemContato > limites[i] + (i === 0 ? 1 : i === 1 ? 3 : i === 2 ? 4 : i === 3 ? 14 : 0);
+    let badgeCls = '', badgeLabel = `D+${e.dia}`;
+    if (diasSemContato > e.dia && i < etapaAtiva) { badgeCls = 'done'; badgeLabel = `✓ D+${e.dia}`; }
+    else if (i === etapaAtiva) { badgeCls = ''; badgeLabel = `▶ Enviar agora`; }
+    const isOpen = i === etapaAtiva;
+
+    const msgsHtml = e.msgs.map((m, mi) => `
+      <div class="msg-card">
+        <div class="msg-card-label">${m.label}</div>
+        <div>${m.texto}</div>
+        <div class="msg-card-actions">
+          <button class="msg-copy-mini" onclick="copiarMsgRegua(this, \`${m.texto.replace(/`/g,"'")}\`)">📋 Copiar</button>
+          <a class="msg-copy-mini" href="https://wa.me/55${lead.phone.replace(/\D/g,'')}?text=${encodeURIComponent(m.texto)}" target="_blank" style="text-decoration:none">📱 Enviar WA</a>
+        </div>
+      </div>`).join('');
+
+    const ligHtml = `
+      <div class="msg-card">
+        <div class="msg-card-label call">📞 Script de Ligação</div>
+        <div>${e.ligacao}</div>
+        <div class="msg-card-actions">
+          <button class="msg-copy-mini" onclick="copiarMsgRegua(this, \`${e.ligacao.replace(/`/g,"'")}\`)">📋 Copiar script</button>
+        </div>
+      </div>`;
+
+    return `<div class="regua-step ${isOpen ? 'active' : ''}" id="regua-step-${i}">
+      <div class="regua-step-header" onclick="toggleRegua(${i})">
+        <span class="regua-step-badge ${badgeCls}">${badgeLabel}</span>
+        <div>
+          <div class="regua-step-title">${e.titulo}</div>
+          <div class="regua-step-sub">${e.sub}</div>
+        </div>
+        <span class="regua-toggle">${isOpen ? '▲' : '▼'}</span>
+      </div>
+      <div class="regua-step-body">
+        ${msgsHtml}
+        ${ligHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('panel-regua').innerHTML = html;
+}
+
+function toggleRegua(i) {
+  const el = document.getElementById(`regua-step-${i}`);
+  const isOpen = el.classList.contains('active');
+  // fechar todos
+  document.querySelectorAll('.regua-step').forEach((s, idx) => {
+    s.classList.remove('active');
+    const toggle = s.querySelector('.regua-toggle');
+    if (toggle) toggle.textContent = '▼';
+  });
+  if (!isOpen) {
+    el.classList.add('active');
+    const toggle = el.querySelector('.regua-toggle');
+    if (toggle) toggle.textContent = '▲';
+  }
+}
+
+function renderPanelFuConfig(lead) {
+  const pausado = !!lead.fuPausado;
+  const regua = lead.fuRegua || [1,3,7,15,30];
+  const custom = regua.join(',') !== '1,3,7,15,30';
+
+  document.getElementById('panel-fu-config').innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px">
+
+      <!-- Toggle pausar -->
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid ${pausado ? 'rgba(239,68,68,0.3)' : 'var(--border2)'};background:${pausado ? 'rgba(239,68,68,0.06)' : 'var(--bg2)'};margin-bottom:12px;transition:all 0.2s">
+        <div style="position:relative;width:36px;height:20px;flex-shrink:0">
+          <input type="checkbox" id="panel-pausar-fu" ${pausado ? 'checked' : ''} style="opacity:0;width:0;height:0;position:absolute" onchange="togglePanelFu()">
+          <div id="panel-fu-track" style="position:absolute;inset:0;border-radius:10px;background:${pausado ? 'var(--danger)' : 'var(--bg4)'};border:1px solid ${pausado ? 'var(--danger)' : 'var(--border2)'};transition:all 0.2s"></div>
+          <div id="panel-fu-thumb" style="position:absolute;top:2px;left:${pausado ? '18px' : '2px'};width:14px;height:14px;border-radius:50%;background:#fff;border:1px solid var(--border2);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.12)"></div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:${pausado ? 'var(--danger)' : 'var(--text)'}">
+            ${pausado ? '⏸ Follow-up pausado' : 'Pausar follow-up automático'}
+          </div>
+          <div style="font-size:11px;color:var(--text3)">${pausado ? 'Lead não aparece nos alertas' : 'Lead não aparecerá nos alertas enquanto pausado'}</div>
+        </div>
+      </label>
+
+      <!-- Régua de dias -->
+      <div id="panel-fu-days-wrap" style="opacity:${pausado ? '0.35' : '1'};pointer-events:${pausado ? 'none' : 'auto'}">
+        <div style="font-size:11px;color:var(--text2);font-weight:500;margin-bottom:7px">Régua de dias ${custom ? '<span style="color:var(--purple2);font-size:10px;font-weight:600;background:var(--purple-soft);padding:1px 7px;border-radius:6px;border:1px solid rgba(108,62,241,0.2);margin-left:4px">PERSONALIZADA</span>' : '<span style="font-size:10px;color:var(--text3)">(padrão)</span>'}</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px">
+          ${regua.map((v, i) => `
+            <div>
+              <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:3px">${i+1}º FU</div>
+              <input class="form-input" id="panel-fu-d${i}" type="number" min="1" value="${v}" style="text-align:center;padding:6px 4px;font-size:12px" oninput="salvarReguaPanel()">
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="salvarReguaPanel()" style="flex:1;padding:7px;border-radius:var(--radius-sm);background:var(--purple);border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar régua</button>
+          <button onclick="resetarReguaPanel()" style="padding:7px 12px;border-radius:var(--radius-sm);background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Resetar</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function togglePanelFu() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (!lead) return;
+  const pausado = document.getElementById('panel-pausar-fu').checked;
+  lead.fuPausado = pausado;
+  lead.history = lead.history || [];
+  lead.history.push({ date: new Date().toISOString(), text: pausado ? '⏸ Follow-up pausado' : '▶ Follow-up reativado' });
+  saveleads();
+  renderPanelFuConfig(lead);
+  renderDashboard();
+  renderAlertas();
+  showToast(pausado ? `Follow-up de ${lead.nome} pausado.` : `Follow-up de ${lead.nome} reativado!`, 'success');
+}
+
+function salvarReguaPanel() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (!lead) return;
+  const nova = [0,1,2,3,4].map(i => parseInt(document.getElementById(`panel-fu-d${i}`)?.value) || [1,3,7,15,30][i]);
+  lead.fuRegua = nova;
+  lead.history = lead.history || [];
+  lead.history.push({ date: new Date().toISOString(), text: `⚙️ Régua personalizada: D+${nova.join(' · D+')}` });
+  saveleads();
+  renderPanelFuConfig(lead);
+  renderDashboard();
+  showToast('Régua salva!', 'success');
+}
+
+function resetarReguaPanel() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (!lead) return;
+  lead.fuRegua = [1,3,7,15,30];
+  lead.history = lead.history || [];
+  lead.history.push({ date: new Date().toISOString(), text: '↩ Régua resetada para o padrão: D+1 · D+3 · D+7 · D+15 · D+30' });
+  saveleads();
+  renderPanelFuConfig(lead);
+  renderDashboard();
+  showToast('Régua resetada para o padrão.', 'success');
+}
+
+function copiarMsgRegua(btn, texto) {
+  navigator.clipboard.writeText(texto).then(() => {
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '📋 Copiar'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function closePanel() {
+  document.getElementById('lead-panel').classList.remove('open');
+  document.getElementById('panel-overlay').classList.remove('open');
+  currentLeadId = null;
+}
+
+function atualizarStatusLead() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (!lead) return;
+  lead.status = document.getElementById('panel-status-select').value;
+  lead.temp = document.getElementById('panel-temp-select').value;
+  lead.lastContact = new Date().toISOString();
+  lead.history = lead.history || [];
+  lead.history.push({ date: new Date().toISOString(), text: `Status atualizado para "${lead.status}" · Temperatura: ${lead.temp}` });
+  saveleads();
+  showToast('Status atualizado!');
+  openPanel(currentLeadId);
+  renderDashboard();
+}
+
+function adicionarNota() {
+  const nota = document.getElementById('panel-nota').value.trim();
+  if (!nota) return;
+  const lead = leads.find(l => l.id === currentLeadId);
+  lead.notes = lead.notes || [];
+  lead.notes.push({ date: new Date().toISOString(), text: '📝 ' + nota });
+  lead.lastContact = new Date().toISOString();
+  saveleads();
+  document.getElementById('panel-nota').value = '';
+  showToast('Nota salva!');
+  openPanel(currentLeadId);
+}
+
+function registrarContato() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (!lead) return;
+  lead.lastContact = new Date().toISOString();
+  lead.history = lead.history || [];
+  lead.history.push({ date: new Date().toISOString(), text: '📞 Contato registrado manualmente' });
+  saveleads();
+  showToast('Contato registrado!');
+  openPanel(currentLeadId);
+  renderDashboard();
+}
+
+function excluirLead() {
+  if (!confirm('Excluir este lead permanentemente?')) return;
+  leads = leads.filter(l => l.id !== currentLeadId);
+  saveleads();
+  closePanel();
+  renderLeads();
+  renderDashboard();
+  showToast('Lead excluído.');
+}
+
+function irParaGerador() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  closePanel();
+  showView('gerador');
+  setTimeout(() => {
+    const sel = document.getElementById('gen-lead-select');
+    sel.value = lead.id;
+    onGenLeadSelect();
+  }, 100);
+}
+
+// ============================================================
+//  MODAL LEAD
+// ============================================================
+function toggleFuConfig() {
+  const pausado = document.getElementById('f-pausar-fu').checked;
+  const track = document.getElementById('fu-toggle-track');
+  const thumb = document.getElementById('fu-toggle-thumb');
+  const custom = document.getElementById('fu-custom-wrap');
+  if (pausado) {
+    track.style.background = 'var(--danger)';
+    track.style.borderColor = 'var(--danger)';
+    thumb.style.left = '18px';
+    custom.style.opacity = '0.35';
+    custom.style.pointerEvents = 'none';
+  } else {
+    track.style.background = 'var(--bg4)';
+    track.style.borderColor = 'var(--border2)';
+    thumb.style.left = '2px';
+    custom.style.opacity = '1';
+    custom.style.pointerEvents = 'auto';
+  }
+}
+
+function openLeadModal(id) {
+  editingLeadId = id || null;
+  document.getElementById('modal-title').textContent = id ? 'Editar Lead' : 'Novo Lead';
+
+  // Reset fu toggle
+  const cb = document.getElementById('f-pausar-fu');
+  cb.checked = false;
+  toggleFuConfig();
+  document.getElementById('f-fu1').value = 1;
+  document.getElementById('f-fu2').value = 3;
+  document.getElementById('f-fu3').value = 7;
+  document.getElementById('f-fu4').value = 15;
+  document.getElementById('f-fu5').value = 30;
+
+  if (id) {
+    const l = leads.find(x => x.id === id);
+    document.getElementById('f-nome').value = l.nome;
+    document.getElementById('f-phone').value = l.phone;
+    document.getElementById('f-canal').value = l.canal;
+    document.getElementById('f-empr').value = l.empr || '';
+    document.getElementById('f-perfil').value = l.perfil;
+    document.getElementById('f-temp').value = l.temp;
+    document.getElementById('f-status').value = l.status;
+    document.getElementById('f-fgts').value = l.fgts;
+    document.getElementById('f-renda').value = l.renda || '';
+    document.getElementById('f-obs').value = l.obs || '';
+    // Carregar config fu
+    if (l.fuPausado) { cb.checked = true; toggleFuConfig(); }
+    if (l.fuRegua) {
+      document.getElementById('f-fu1').value = l.fuRegua[0] ?? 1;
+      document.getElementById('f-fu2').value = l.fuRegua[1] ?? 3;
+      document.getElementById('f-fu3').value = l.fuRegua[2] ?? 7;
+      document.getElementById('f-fu4').value = l.fuRegua[3] ?? 15;
+      document.getElementById('f-fu5').value = l.fuRegua[4] ?? 30;
+    }
+  } else {
+    ['f-nome','f-phone','f-empr','f-renda','f-obs'].forEach(fid => document.getElementById(fid).value = '');
+  }
+  document.getElementById('lead-modal').classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function salvarLead() {
+  const nome = document.getElementById('f-nome').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  if (!nome || !phone) { showToast('Nome e telefone são obrigatórios.'); return; }
+
+  const fuPausado = document.getElementById('f-pausar-fu').checked;
+  const fuRegua = [
+    parseInt(document.getElementById('f-fu1').value) || 1,
+    parseInt(document.getElementById('f-fu2').value) || 3,
+    parseInt(document.getElementById('f-fu3').value) || 7,
+    parseInt(document.getElementById('f-fu4').value) || 15,
+    parseInt(document.getElementById('f-fu5').value) || 30,
+  ];
+  const fuPersonalizado = fuRegua.join(',') !== '1,3,7,15,30';
+
+  const campos = { nome, phone, canal: document.getElementById('f-canal').value, empr: document.getElementById('f-empr').value, perfil: document.getElementById('f-perfil').value, temp: document.getElementById('f-temp').value, status: document.getElementById('f-status').value, fgts: document.getElementById('f-fgts').value, renda: document.getElementById('f-renda').value, obs: document.getElementById('f-obs').value, fuPausado, fuRegua };
+
+  if (editingLeadId) {
+    const lead = leads.find(l => l.id === editingLeadId);
+    Object.assign(lead, campos);
+    if (fuPausado) lead.history.push({ date: new Date().toISOString(), text: '⏸ Follow-up pausado manualmente' });
+    else if (fuPersonalizado) lead.history.push({ date: new Date().toISOString(), text: `⚙️ Régua personalizada: D+${fuRegua.join(' · D+')}` });
+  } else {
+    const novo = { id: genId(), ...campos, lastContact: new Date().toISOString(), history: [{ date: new Date().toISOString(), text: '✨ Lead cadastrado' }], notes: [] };
+    if (fuPausado) novo.history.push({ date: new Date().toISOString(), text: '⏸ Follow-up pausado' });
+    else if (fuPersonalizado) novo.history.push({ date: new Date().toISOString(), text: `⚙️ Régua personalizada: D+${fuRegua.join(' · D+')}` });
+    leads.unshift(novo);
+  }
+  saveleads();
+  closeModal('lead-modal');
+  renderLeads();
+  renderDashboard();
+  showToast('Lead salvo com sucesso!', 'success');
+}
+
+// ============================================================
+//  GERADOR DE PROMPT
+// ============================================================
+function populateGenSelect() {
+  const sel = document.getElementById('gen-lead-select');
+  sel.innerHTML = '<option value="">— Preencher manualmente —</option>' + leads.map(l => `<option value="${l.id}">${l.nome} · ${l.empr || l.canal}</option>`).join('');
+}
+
+function onGenLeadSelect() {
+  const id = document.getElementById('gen-lead-select').value;
+  if (!id) return;
+  const l = leads.find(x => x.id === id);
+  document.getElementById('gen-nome').value = l.nome;
+  document.getElementById('gen-empr').value = l.empr || '';
+  document.getElementById('gen-dias').value = daysAgo(l.lastContact);
+  const d = daysAgo(l.lastContact);
+  const genStat = document.getElementById('gen-status');
+  if (d > 15) genStat.value = 'Sumido há dias';
+  else if (d > 7) genStat.value = 'Não responde';
+  else if (l.status === 'Negociação') genStat.value = 'Em dúvida sobre o valor';
+  else if (l.status === 'Follow-up') genStat.value = 'Interessado mas com dúvidas';
+  else genStat.value = 'Interessado mas com dúvidas';
+  if (l.obs) document.getElementById('gen-contexto').value = l.obs;
+  selectPill('perfil', l.perfil === 'Investidor' ? 'investidor' : 'moradia');
+  atualizarPrompt();
+}
+
+function selectTone(btn) {
+  document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedTone = btn.dataset.tone;
+  atualizarPrompt();
+}
+
+function selectPill(group, val) {
+  selectedPerfil = val;
+  document.getElementById('pill-moradia').classList.toggle('selected', val === 'moradia');
+  document.getElementById('pill-investidor').classList.toggle('selected', val === 'investidor');
+  atualizarPrompt();
+}
+
+function atualizarPrompt() {
+  const nome    = document.getElementById('gen-nome').value.trim();
+  const empr    = document.getElementById('gen-empr').value.trim();
+  const status  = document.getElementById('gen-status').value;
+  const dias    = document.getElementById('gen-dias').value || '0';
+  const ctx     = document.getElementById('gen-contexto').value.trim();
+  const ctxEl   = document.getElementById('ctx-chars');
+
+  if (ctxEl) {
+    const c = ctx.length;
+    ctxEl.textContent = c === 0
+      ? '0 caracteres — quanto mais contexto, mais precisa a mensagem'
+      : c < 60
+      ? `${c} caracteres — adicione mais detalhes para melhor resultado`
+      : `${c} caracteres ✓`;
+  }
+
+  const outputEl = document.getElementById('prompt-output-box');
+  if (!nome && !ctx) {
+    outputEl.innerHTML = '<span style="color:var(--text3);font-style:italic;font-family:\'DM Sans\',sans-serif;font-size:13px">Preencha o nome do cliente e o contexto da conversa para gerar o prompt...</span>';
+    return;
+  }
+
+  const toneDesc = {
+    urgente:    'urgência real — mencione prazo ou condição válida só hoje, crie senso de agora ou nunca',
+    amigavel:   'amigável e caloroso — como um amigo que quer ajudar, sem pressão, construa confiança',
+    escassez:   'escassez — destaque que as unidades estão acabando e outros clientes já estão avançando',
+    reversa:    'psicologia reversa — demonstre desapego total, deixe a escolha com o cliente, sem forçar',
+    agressivo:  'vendas agressivo — alta pressão, gatilho de perda forte, crie urgência máxima',
+    reativacao: 'reativação de lead frio — mensagem curtíssima com gancho de curiosidade irresistível'
+  };
+
+  const perfilDesc = selectedPerfil === 'investidor'
+    ? 'Investidor — foco em ROI, patrimônio que se paga com aluguel, valorização'
+    : 'Moradia própria — sonho da casa própria, programa MCMV, sair do aluguel';
+
+  const prompt = `Você é André Braga, corretor imobiliário especialista em vendas MCMV pela Vivaz/Cyrela em São Paulo, conhecido como "Corretor da IA".
+
+Escreva UMA mensagem de WhatsApp para o seguinte lead:
+
+CLIENTE: ${nome || '[nome do cliente]'}
+EMPREENDIMENTO: ${empr || '[empreendimento]'}
+STATUS: ${status}
+DIAS SEM CONTATO: ${dias} dias
+PERFIL: ${perfilDesc}
+
+CONTEXTO DA ÚLTIMA CONVERSA:
+${ctx || '[sem contexto informado]'}
+
+TOM DA MENSAGEM: ${toneDesc[selectedTone]}
+
+REGRAS OBRIGATÓRIAS:
+1. Comece diretamente com o nome do cliente
+2. Máximo 4 a 5 linhas curtas — seja direto
+3. A mensagem deve ser construída com base no contexto acima — não ignore nenhum detalhe informado
+4. Use linguagem natural e humana, como se fosse uma conversa real de WhatsApp
+5. Inclua 1 ou 2 gatilhos mentais relevantes (urgência, escassez, oportunidade ou perda)
+6. Termine com uma pergunta direta ou chamada para ação clara
+7. Sem asteriscos, sem markdown, sem emojis excessivos
+8. Se o perfil for investidor, mencione que o imóvel se paga com o próprio aluguel
+9. Mencione FEIRÃO ou CONDIÇÃO ESPECIAL quando fizer sentido no contexto
+
+Retorne APENAS a mensagem final, sem explicações, sem aspas, sem títulos.`;
+
+  outputEl.textContent = prompt;
+}
+
+function copiarPrompt() {
+  const txt = document.getElementById('prompt-output-box').textContent;
+  if (!txt || txt.includes('Preencha o nome')) {
+    showToast('Preencha pelo menos o nome e o contexto antes de copiar.');
+    return;
+  }
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.getElementById('copy-prompt-btn');
+    btn.textContent = '✓ Copiado! Cole no Claude.ai';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copiar Prompt'; btn.classList.remove('copied'); }, 3000);
+    showToast('Prompt copiado! Abra o Claude.ai e cole.', 'success');
+  });
+}
+
+
+// ============================================================
+//  ALERTAS
+// ============================================================
+function renderAlertas() {
+  const ativos = leads.filter(l => l.status !== 'Fechamento');
+
+  // Grupos alinhados com a régua
+  const grupos = [
+    {
+      key: 'd1', label: 'D+1 · Primeiro retorno',
+      desc: 'Não responderam a primeira mensagem — enviar follow-up leve',
+      cor: 'var(--purple2)', borderCor: 'rgba(108,62,241,0.25)', bgCor: 'rgba(108,62,241,0.05)', dotCls: 'medium',
+      leads: ativos.filter(l => { if (l.fuPausado) return false; const r = l.fuRegua || [1,3,7,15,30]; const d = daysAgo(l.lastContact); return d >= r[0] && d < r[1]; })
+    },
+    {
+      key: 'd3', label: 'D+3 · Aquecimento',
+      desc: '3 dias sem resposta — reforçar valor com simulação personalizada',
+      cor: 'var(--warm)', borderCor: 'rgba(234,179,8,0.25)', bgCor: 'rgba(234,179,8,0.04)', dotCls: 'medium',
+      leads: ativos.filter(l => { if (l.fuPausado) return false; const r = l.fuRegua || [1,3,7,15,30]; const d = daysAgo(l.lastContact); return d >= r[1] && d < r[2]; })
+    },
+    {
+      key: 'd7', label: 'D+7 · Urgência e escassez',
+      desc: '7 dias sem resposta — criar senso de perda e prazo real',
+      cor: 'var(--hot)', borderCor: 'rgba(249,115,22,0.25)', bgCor: 'rgba(249,115,22,0.04)', dotCls: 'high',
+      leads: ativos.filter(l => { if (l.fuPausado) return false; const r = l.fuRegua || [1,3,7,15,30]; const d = daysAgo(l.lastContact); return d >= r[2] && d < r[3]; })
+    },
+    {
+      key: 'd15', label: 'D+15 · Psicologia reversa',
+      desc: '15 dias sem resposta — desapego total para reativar o interesse',
+      cor: 'var(--danger)', borderCor: 'rgba(239,68,68,0.25)', bgCor: 'rgba(239,68,68,0.04)', dotCls: 'critical',
+      leads: ativos.filter(l => { if (l.fuPausado) return false; const r = l.fuRegua || [1,3,7,15,30]; const d = daysAgo(l.lastContact); return d >= r[3] && d < r[4]; })
+    },
+    {
+      key: 'd30', label: 'D+30 · Reativação fria',
+      desc: 'Mais de 30 dias — nova abordagem, novo ângulo',
+      cor: '#9ca3af', borderCor: 'rgba(156,163,175,0.3)', bgCor: 'rgba(156,163,175,0.04)', dotCls: 'critical',
+      leads: ativos.filter(l => { if (l.fuPausado) return false; const r = l.fuRegua || [1,3,7,15,30]; const d = daysAgo(l.lastContact); return d >= r[4]; })
+    },
+  ];
+
+  const totalAlerta = grupos.reduce((acc, g) => acc + g.leads.length, 0);
+
+  let html = `<div class="section-header">
+    <div class="section-title">🔔 Central de Alertas</div>
+    <div style="font-size:12px;color:var(--text2)">${totalAlerta} lead(s) aguardando ação</div>
+  </div>`;
+
+  let algum = false;
+  grupos.forEach(g => {
+    if (g.leads.length === 0) return;
+    algum = true;
+    html += `<div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span class="urgency-dot ${g.dotCls}"></span>
+        <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:${g.cor}">${g.label}</span>
+        <span style="font-size:11px;color:var(--text3);margin-left:4px">— ${g.desc}</span>
+        <span style="margin-left:auto;background:${g.bgCor};border:1px solid ${g.borderCor};color:${g.cor};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;font-family:'Syne',sans-serif">${g.leads.length}</span>
+      </div>`;
+    html += g.leads.sort((a,b) => daysAgo(b.lastContact) - daysAgo(a.lastContact)).map(l => {
+      const d = daysAgo(l.lastContact);
+      return `<div style="background:var(--bg2);border:1px solid ${g.borderCor};border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px" id="alerta-card-${l.id}">
+        <div style="width:38px;height:38px;border-radius:50%;background:${g.bgCor};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:${g.cor};font-family:'Syne',sans-serif;flex-shrink:0">${l.nome[0]}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px;margin-bottom:2px">${l.nome}</div>
+          <div style="font-size:11px;color:var(--purple2);margin-bottom:2px">📱 ${formatPhone(l.phone)}</div>
+          <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.empr || 'S/ empreendimento'} · ${l.canal} · ${l.status}</div>
+        </div>
+        <div style="text-align:right;margin-right:10px;flex-shrink:0">
+          <div style="font-size:18px;font-weight:700;color:${g.cor};font-family:'Syne',sans-serif;line-height:1">${d}d</div>
+          <div style="font-size:10px;color:var(--text3)">sem contato</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="openPanel('${l.id}')">Ver régua</button>
+          <button class="btn btn-ghost btn-sm" onclick="irGeradorDireto('${l.id}')">⚡ IA</button>
+          <button 
+            style="padding:6px 12px;border-radius:var(--radius-sm);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.35);color:var(--success);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap"
+            onclick="concluirFollowup('${l.id}')"
+            onmouseover="this.style.background='rgba(34,197,94,0.2)'"
+            onmouseout="this.style.background='rgba(34,197,94,0.1)'"
+          >✓ Concluído</button>
+        </div>
+      </div>`;
+    }).join('');
+    html += '</div>';
+  });
+
+  if (!algum) {
+    html += `<div class="empty-state"><div class="e-icon">✅</div><div class="e-title">Tudo em dia!</div><p>Nenhum lead aguardando follow-up.</p></div>`;
+  }
+
+  document.getElementById('alertas-content').innerHTML = html;
+}
+
+function concluirFollowup(id) {
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+
+  // Anima o card antes de sumir
+  const card = document.getElementById('alerta-card-' + id);
+  if (card) {
+    card.style.transition = 'all 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(20px)';
+  }
+
+  // Registra contato e nota no histórico
+  const etapaLabel = (() => {
+    const d = daysAgo(lead.lastContact);
+    if (d < 3)  return 'D+1';
+    if (d < 7)  return 'D+3';
+    if (d < 15) return 'D+7';
+    if (d < 30) return 'D+15';
+    return 'D+30';
+  })();
+
+  lead.lastContact = new Date().toISOString();
+  lead.history = lead.history || [];
+  lead.history.push({
+    date: new Date().toISOString(),
+    text: `✅ Follow-up ${etapaLabel} concluído — contato registrado`
+  });
+  saveleads();
+
+  setTimeout(() => {
+    renderAlertas();
+    renderDashboard();
+    showToast(`Follow-up de ${lead.nome} marcado como concluído!`, 'success');
+  }, 300);
+}
+
+function irGeradorDireto(id) {
+  const lead = leads.find(l => l.id === id);
+  showView('gerador');
+  setTimeout(() => {
+    document.getElementById('gen-lead-select').value = id;
+    onGenLeadSelect();
+    const d = daysAgo(lead.lastContact);
+    const toneTarget = d > 15 ? 'reversa' : d > 7 ? 'escassez' : 'urgente';
+    const btn = document.querySelector(`[data-tone="${toneTarget}"]`);
+    if (btn) selectTone(btn);
+  }, 100);
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(msg, type = '') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ============================================================
+//  BACKUP & RESTORE
+// ============================================================
+function openBackupModal() {
+  const data = localStorage.getItem('dc_leads') || '[]';
+  const size = new Blob([data]).size;
+  const lastBk = localStorage.getItem('dc_last_backup');
+  document.getElementById('bk-total').textContent = leads.length;
+  document.getElementById('bk-size').textContent = size < 1024 ? size + ' B' : (size / 1024).toFixed(1) + ' KB';
+  document.getElementById('bk-last').textContent = lastBk ? new Date(lastBk).toLocaleDateString('pt-BR') + ' às ' + new Date(lastBk).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : 'Nunca';
+  document.getElementById('backup-modal').classList.add('open');
+  closeSidebar();
+}
+
+function exportarBackup() {
+  const payload = {
+    versao: '1.0',
+    exportadoEm: new Date().toISOString(),
+    sistema: 'DIca Follow-Up CRM',
+    totalLeads: leads.length,
+    leads: leads
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+  a.href = url;
+  a.download = `dica_backup_${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  localStorage.setItem('dc_last_backup', new Date().toISOString());
+  document.getElementById('bk-last').textContent = 'Agora mesmo';
+  showToast('Backup baixado com sucesso!', 'success');
+}
+
+function importarBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      const importedLeads = parsed.leads || parsed;
+      if (!Array.isArray(importedLeads)) throw new Error('Formato inválido');
+      if (!confirm(`Restaurar ${importedLeads.length} lead(s)? Os dados atuais serão substituídos.`)) return;
+      leads = importedLeads;
+      saveleads();
+      renderDashboard();
+      renderLeads();
+      closeModal('backup-modal');
+      showToast(`${importedLeads.length} leads restaurados!`, 'success');
+    } catch(err) {
+      showToast('Arquivo inválido. Use um backup gerado por este sistema.'); 
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-drop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.name.endsWith('.json')) { showToast('Envie um arquivo .json'); return; }
+  const fakeInput = { files: [file] };
+  importarBackup(fakeInput);
+}
+
+// ============================================================
+//  SCRIPTS DE VENDAS
+// ============================================================
+const SCRIPTS = [
+  {
+    id: 'apresentacao',
+    num: 1,
+    titulo: 'Apresentação',
+    sub: 'Primeiro contato — quem é você e qual é o objetivo',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Abertura', texto: `Oi, [NOME]! Tudo bem? 😊\n\nSou o André DIca, corretor da Vivaz — que é a marca residencial da Cyrela, uma das maiores construtoras do Brasil.\n\nEntrei em contato porque vi que você tem interesse em imóvel e queria entender melhor o que você busca para te ajudar da melhor forma possível.` },
+          { label: 'Primeira pergunta', texto: `Só pra eu te direcionar certo: você está procurando um imóvel pra morar ou como investimento?` },
+        ],
+        dica: 'Aguarde a resposta antes de continuar. A resposta define todo o roteiro seguinte — moradia ou investidor.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'Abertura', texto: `[NOME], oi! André DIca da Vivaz — Cyrela aqui.\n\nSei que você deve receber bastante mensagem de corretor, então vou ser direto: não estou aqui pra te empurrar nada.\n\nSó entrei em contato porque surgiu uma oportunidade pontual na região que você marcou interesse — e antes de oferecer pra mais alguém, quis saber se ainda faz sentido pra você.` },
+          { label: 'Primeira pergunta', texto: `Uma coisa rápida: o imóvel seria pra você morar ou tá pensando em investir?` },
+        ],
+        dica: 'O tom de "não vou empurrar" baixa a guarda do cliente. A sensação de oportunidade exclusiva cria curiosidade imediata.'
+      }
+    ]
+  },
+  {
+    id: 'vivaz',
+    num: 2,
+    titulo: 'Quem é a Vivaz',
+    sub: 'Construir credibilidade e confiança na marca',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Sobre a Vivaz', texto: `A Vivaz é a marca residencial da Cyrela — uma das construtoras mais sólidas do Brasil, com mais de 60 anos de mercado e mais de 100 mil apartamentos entregues.\n\nA proposta da Vivaz é simples: apartamentos modernos, em localização estratégica, com lazer completo e preço acessível pelo programa Minha Casa Minha Vida.\n\nOu seja: você tem a segurança de uma grande construtora com o preço que cabe no seu bolso. 😊` },
+        ],
+        dica: 'Conecte sempre a credibilidade da Cyrela com o benefício direto do cliente — segurança + preço acessível.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'Sobre a Vivaz', texto: `Vou te contar algo que a maioria das pessoas só descobre depois que perde a oportunidade:\n\nA Vivaz é da Cyrela — 60 anos de mercado, mais de 100 mil apartamentos entregues. Não é construtora pequena que some depois da obra.\n\nA diferença é que os imóveis deles dentro do MCMV vendem rápido justamente por isso — as pessoas confiam na entrega. Quando chega ao meu ouvido, já tem gente na frente.\n\nPor isso entrei em contato com você antes de abrir pra lista de espera.` },
+        ],
+        dica: 'A sensação de "as outras pessoas já sabem disso" cria FOMO (medo de perder) sem precisar mencionar preço ainda.'
+      }
+    ]
+  },
+  {
+    id: 'regiao',
+    num: 3,
+    titulo: 'Região de Preferência',
+    sub: 'Zona Leste, Oeste, Norte ou Sul — mapear onde o cliente quer estar',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Pergunta de região', texto: `Ótimo! Agora me conta: você tem preferência de região em São Paulo?\n\nTrabalhamos principalmente com Zona Leste, Zona Norte, Zona Sul e Zona Oeste — cada uma com características diferentes.\n\nO que pesa mais pra você: ficar perto do trabalho, da família, ou prefere uma região específica?` },
+          { label: 'Reforço de localização', texto: `[Após resposta do cliente]\n\nPerfeito! A [REGIÃO] é exatamente onde temos projetos bem localizados — perto de [REFERÊNCIA LOCAL: metrô / comércio / escola].\n\nFacilita muito o dia a dia, né? 😊` },
+        ],
+        dica: 'Sempre espelhe o que o cliente disse e conecte com uma referência real da região. Mostra que você conhece e gera confiança.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'Pergunta de região', texto: `[NOME], qual região você considera? Porque isso muda tudo.\n\nNa Zona Leste e Norte temos os empreendimentos com mais unidades — mas justamente por isso giram mais rápido.\n\nNa Zona Sul e Oeste as unidades são mais disputadas desde o lançamento.\n\nMe fala onde você tá pensando que eu te digo o que ainda está disponível.` },
+        ],
+        dica: 'Criar a percepção de que cada região tem sua dinâmica própria posiciona você como especialista — não como um tirador de pedido.'
+      }
+    ]
+  },
+  {
+    id: 'empreendimento',
+    num: 4,
+    titulo: 'O Empreendimento',
+    sub: 'Apresentar o projeto com 20+ itens de lazer e diferenciais',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Apresentação do projeto', texto: `Deixa eu te apresentar o [EMPREENDIMENTO]!\n\nÉ um condomínio completo com mais de 20 itens de lazer:\n\n🏊 Piscina adulto e infantil\n🏋️ Academia completa\n⚽ Quadra poliesportiva\n🎮 Salão de jogos\n🎉 Salão de festas\n🌳 Área verde e praça interna\n🧒 Playground\n🍖 Espaço gourmet / churrasqueira\n🐾 Pet place\n🚴 Bicicletário\n🔒 Portaria 24h e câmeras\n🚗 Vaga de garagem\n📦 Depósito privativo\n\n... e muito mais!\n\nTudo isso dentro do condomínio — segurança, lazer e praticidade pra toda a família. 😊` },
+          { label: 'Conexão emocional', texto: `Imagina chegar do trabalho e ter tudo isso disponível sem precisar sair de casa.\n\nFim de semana com a família na piscina, as crianças no playground, você no espaço gourmet com os amigos.\n\nÉ o estilo de vida que o condomínio oferece — não é só um apartamento. É uma mudança de qualidade de vida. 🏡` },
+        ],
+        dica: 'Primeiro liste os itens concretos, depois faça a ponte emocional. O cliente precisa se ver morando lá.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'Apresentação com escassez', texto: `[NOME], vou te mostrar o [EMPREENDIMENTO] — mas já te aviso: quando as pessoas veem o lazer, a reação é sempre a mesma.\n\nSão mais de 20 itens: piscina, academia, quadra, salão de festas, espaço gourmet, playground, pet place, portaria 24h, câmeras, vaga, depósito...\n\nO que mais impressiona quem visita o stand é perceber que está pagando MENOS do que paga de aluguel hoje — e ainda tendo tudo isso.\n\nVou te mandar as fotos reais, não renderização. Você julga depois.` },
+          { label: 'Gatilho de comparação', texto: `Uma pergunta direta, [NOME]: quanto você paga de aluguel hoje?\n\n[Após resposta]\n\nÉ exatamente o que eu pensei. A parcela aqui no [EMPREENDIMENTO] fica igual ou menor — e no final você tem um patrimônio. No aluguel, você tem... mais uma conta.\n\nNão to dizendo que é certo pra todo mundo. Mas vale pelo menos ver os números, concorda?` },
+        ],
+        dica: 'A comparação aluguel x parcela é o gatilho mais poderoso do MCMV. Use sempre que souber a renda aproximada.'
+      }
+    ]
+  },
+  {
+    id: 'mcmv',
+    num: 5,
+    titulo: 'O que é o MCMV',
+    sub: 'Explicar o programa, ato a partir de R$500 e financiamento de até 100%',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Explicação do MCMV', texto: `Vou te explicar como funciona o Minha Casa Minha Vida de um jeito simples:\n\nÉ um programa do governo federal que subsidia parte do imóvel para quem tem renda de até R$8.000. Isso significa que você paga MENOS pelo mesmo apartamento.\n\nNo nosso caso:\n✅ Entrada (ato) a partir de R$ 500,00\n✅ Financiamento de até 100% pelo banco\n✅ Taxas de juros reduzidas (muito abaixo do mercado)\n✅ Pode usar o FGTS na entrada ou para amortizar\n✅ Parcela que cabe no bolso\n\nNa prática: você entra com pouco, o banco financia o restante com juros subsidiados, e a parcela fica parecida (ou menor) com o aluguel que você paga hoje. 😊` },
+          { label: 'Simplificação', texto: `Resumindo de forma bem direta:\n\nCom o MCMV, o governo entra "como sócio" no seu financiamento — reduzindo os juros e a entrada pra você conseguir realizar o sonho da casa própria com mais facilidade.\n\nQual é a sua renda bruta mensal hoje, [NOME]? Quero ver exatamente qual faixa te enquadra e quanto vai ser a sua parcela. 📊` },
+        ],
+        dica: 'Sempre termine perguntando a renda — isso qualifica o lead E mostra que você está personalizando a simulação para ele.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'MCMV com urgência', texto: `[NOME], você sabe por que as pessoas perdem essa oportunidade?\n\nPorque ficam esperando "o momento certo" — e enquanto isso, o governo muda as regras do MCMV.\n\nHoje está assim:\n🔥 Entrada a partir de R$500\n🔥 Financiamento de até 100%\n🔥 Juros subsidiados (metade do mercado)\n🔥 FGTS pode entrar na conta\n\nEssa condição não é pra sempre. Em 2023 mudou. Em 2024 mudou de novo. Quando muda, as condições pioram — e quem estava esperando paga mais.\n\nVocê está enquadrado no MCMV. Eu preciso só da sua renda pra confirmar.` },
+          { label: 'Reforço com perda', texto: `Pensa comigo, [NOME]:\n\nSe você não fizer nada hoje, daqui a 2 anos:\n❌ O imóvel vai custar mais\n❌ As condições do MCMV podem mudar\n❌ O aluguel vai ter aumentado\n❌ Você vai estar na mesma situação, só com mais dinheiro gasto\n\nNão sou eu que to dizendo — são os números do mercado.\n\nQual é sua renda hoje? Deixa eu te mostrar a simulação real.` },
+        ],
+        dica: 'O gatilho de "perde quem espera" funciona especialmente bem para leads que já demonstraram interesse mas postergam a decisão.'
+      }
+    ]
+  },
+  {
+    id: 'credito',
+    num: 6,
+    titulo: 'Análise de Crédito',
+    sub: 'On-line ou presencial no stand — fechar o próximo passo',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Apresentar as opções', texto: `Ótimo, [NOME]! Com base no que você me contou, você está enquadrado no MCMV e tudo indica que a análise vai ser tranquila. 😊\n\nAgora preciso fazer uma análise de crédito rápida pra confirmar os valores exatos da sua simulação.\n\nA gente pode fazer de dois jeitos:\n\n📱 Online — você me envia os documentos por aqui, eu processo em 24h e te mando o resultado no WhatsApp.\n\n🏢 Presencial no Stand — você vem visitar o apartamento decorado, toma um café e já aprovamos o crédito na hora.\n\nQual você prefere?` },
+        ],
+        dica: 'Sempre ofereça as duas opções — nunca decida pelo cliente. Mas direcione sutilmente para o stand quando possível.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'Análise com urgência', texto: `[NOME], vou ser honesto com você:\n\nA análise de crédito é onde a maioria das pessoas trava — fica com medo, adia, e quando volta, a unidade que queria já foi vendida.\n\nNão precisa ser assim. São 5 minutos.\n\nVocê prefere fazer online agora (te mando o link, é rápido) ou prefere vir no stand e já aproveita pra ver o apartamento decorado? Tenho horário disponível amanhã.\n\nQual funciona melhor pra você?` },
+          { label: 'Gatilho de reserva', texto: `[NOME], enquanto a gente não faz a análise, eu não consigo reservar a unidade no seu nome.\n\nJá tive cliente que perdeu o apartamento que queria esperando "o momento certo" pra fazer a análise.\n\nMe diz uma coisa: o que te impede de fazer isso hoje? Quero entender se tem alguma dúvida que eu possa resolver agora.` },
+        ],
+        dica: 'A pergunta "o que te impede" é poderosa — traz a objeção real à tona e abre espaço para você resolver no momento.'
+      }
+    ]
+  },
+  {
+    id: 'documentacao',
+    num: 7,
+    titulo: 'Envio de Documentação',
+    sub: 'Orientar o cliente sobre os documentos necessários',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Lista de documentos', texto: `Perfeito, [NOME]! Vou te passar o que precisa agora — é bem simples, não se preocupa. 😊\n\nDocumentos básicos:\n📄 RG e CPF (ou CNH)\n📄 Comprovante de renda (últimos 3 holerites ou declaração do IR)\n📄 Comprovante de residência (últimos 3 meses)\n📄 Certidão de nascimento ou casamento\n📄 Extrato do FGTS (se for usar)\n\nSe você for autônomo ou MEI, também precisa:\n📄 CTPS ou contrato de trabalho\n📄 Declaração de imposto de renda (se tiver)\n📄 Extrato bancário dos últimos 3 meses\n\nComo prefere me enviar? Pode ser foto pelo WhatsApp mesmo. Eu organizo tudo por aqui. 😊` },
+        ],
+        dica: 'Simplifique ao máximo. "Foto pelo WhatsApp mesmo" reduz a fricção e aumenta a taxa de envio dos documentos.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'Documentação com urgência', texto: `[NOME], ótimo! Preciso te adiantar uma coisa:\n\nA reserva da unidade só fica garantida quando a análise de crédito for aprovada — e pra isso eu preciso dos documentos.\n\nSão só esses aqui:\n✅ RG/CPF ou CNH\n✅ Comprovante de renda (3 holerites ou IR)\n✅ Comprovante de residência\n✅ Certidão civil\n✅ FGTS se for usar\n\nEnquanto não tiver isso em mãos, eu não consigo travar a unidade e outra pessoa pode levar.\n\nVocê consegue me enviar hoje ainda? Pode ser foto no WhatsApp, aceito tudo.` },
+        ],
+        dica: '"Travar a unidade" cria senso de urgência real. Use essa expressão com naturalidade — ela é verdadeira no processo.'
+      }
+    ]
+  },
+  {
+    id: 'agendamento',
+    num: 8,
+    titulo: 'Confirmação de Agendamento',
+    sub: 'Garantir a visita ao stand — fechar data e hora',
+    variacoes: [
+      {
+        tom: 'amig',
+        label: 'Amigável & Envolvente',
+        icon: '😊',
+        blocos: [
+          { label: 'Proposta de agendamento', texto: `[NOME], que tal a gente marcar uma visita rápida ao stand?\n\nVocê vem, conhece o apartamento decorado, tira todas as dúvidas pessoalmente e a gente já aproveita pra fechar os detalhes.\n\nTenho disponibilidade:\n📅 [DIA 1] às [HORA]\n📅 [DIA 2] às [HORA]\n📅 [DIA 3] às [HORA]\n\nQual dessas funciona melhor pra você? A visita dura em torno de 40 minutinhos. ☕` },
+          { label: 'Confirmação 24h antes', texto: `[NOME], só passando pra confirmar nossa visita amanhã, [DIA] às [HORA], no stand [ENDEREÇO].\n\nEu já vou separar tudo preparado especialmente pra você — simulação personalizada, fotos do seu apartamento e as condições do feirão.\n\nQualquer coisa, pode me chamar. Até amanhã! 😊` },
+        ],
+        dica: 'Sempre ofereça 3 opções de horário — facilita a decisão. E confirme SEMPRE 24h antes para reduzir não-comparecimentos.'
+      },
+      {
+        tom: 'esc',
+        label: 'Escassez & Psic. Reversa',
+        icon: '🎯',
+        blocos: [
+          { label: 'Agendamento com escassez', texto: `[NOME], preciso ser direto:\n\nTenho 2 horários disponíveis essa semana no stand — depois disso minha agenda fica cheia até o mês que vem.\n\nE olha: a condição de feirão que estou te oferecendo vale até [DATA]. Depois disso, entra nova tabela e os valores sobem.\n\nConsigo te encaixar:\n🔴 [DIA 1] às [HORA]\n🔴 [DIA 2] às [HORA]\n\nQual dos dois você consegue? São só 40 minutos e você vai sair de lá com tudo na mão.` },
+          { label: 'Reativação de agendamento faltoso', texto: `[NOME], você não apareceu hoje — tudo bem?\n\nSó quero saber se aconteceu alguma coisa ou se você desistiu mesmo de vez.\n\nSe desistiu, tudo bem — não tenho problema nenhum. Só me fala pra eu liberar o horário e a unidade que estava reservada pro próximo cliente.\n\nSe não desistiu, ainda dá tempo de remarcar. Só você me dizer.` },
+        ],
+        dica: 'A mensagem de "faltoso" com psicologia reversa tem altíssima taxa de resposta — o cliente sente que pode perder a oportunidade se não reagir.'
+      }
+    ]
+  }
+];
+
+let scriptEtapaAtiva = 0;
+
+function renderScripts() {
+  const nav = document.getElementById('scripts-nav');
+  nav.innerHTML = SCRIPTS.map((e, i) => `
+    <button class="script-etapa-btn ${i === scriptEtapaAtiva ? 'active' : ''}" onclick="setScriptEtapa(${i})">
+      ${e.num}. ${e.titulo}
+    </button>`).join('');
+
+  const etapa = SCRIPTS[scriptEtapaAtiva];
+  const content = document.getElementById('scripts-content');
+  content.innerHTML = `
+    <div class="etapa-header">
+      <div class="etapa-num">${etapa.num}</div>
+      <div>
+        <div class="etapa-title-main">${etapa.titulo}</div>
+        <div class="etapa-title-sub">${etapa.sub}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      ${etapa.variacoes.map(v => `
+        <div class="script-card">
+          <div class="script-card-header">
+            <span class="script-tone-badge badge-${v.tom}">${v.icon} ${v.label}</span>
+          </div>
+          <div class="script-body">
+            ${v.blocos.map(b => `
+              <div class="script-block">
+                <div class="script-block-label"><div class="bl-dot"></div>${b.label}</div>
+                <div class="script-text">${b.texto}</div>
+                <button class="script-copy-btn" onclick="copiarScript(this, \`${b.texto.replace(/`/g, "'").replace(/\\/g, '\\\\')}\`)">📋 Copiar script</button>
+              </div>`).join('')}
+            <div class="script-tip">💡 ${v.dica}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:20px">
+      ${scriptEtapaAtiva > 0 ? `<button class="btn btn-ghost" onclick="setScriptEtapa(${scriptEtapaAtiva - 1})">← Etapa anterior</button>` : '<div></div>'}
+      ${scriptEtapaAtiva < SCRIPTS.length - 1 ? `<button class="btn btn-primary" onclick="setScriptEtapa(${scriptEtapaAtiva + 1})">Próxima etapa →</button>` : '<div style="font-size:13px;color:var(--success);font-weight:600;align-self:center">✅ Script completo!</div>'}
+    </div>
+  `;
+}
+
+function setScriptEtapa(i) {
+  scriptEtapaAtiva = i;
+  renderScripts();
+  document.getElementById('scripts-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copiarScript(btn, texto) {
+  navigator.clipboard.writeText(texto).then(() => {
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '📋 Copiar script'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+renderDashboard();
+renderLeads();
+</script>
+</body>
+</html>
